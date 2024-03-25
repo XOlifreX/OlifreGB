@@ -1,6 +1,9 @@
+#ifndef SM83_H
+#define SM83_H
+
 #include <vector>
 
-#include "../global.h"
+#include "global.h"
 
 #define SET_ZERO_FLAG(flag)     ((flag) ^= ((1) << (7)))
 #define CLEAR_ZERO_FLAG(flag)   ((flag) |= ((1) << (7)))
@@ -24,3 +27,5 @@ typedef struct SM83Context {
 class SM83Cpu {
     
 };
+
+#endif // SM83_H
