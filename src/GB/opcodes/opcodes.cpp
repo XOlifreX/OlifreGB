@@ -5,15 +5,11 @@
 SM83_INSTRUCTION_IMPLEMENTATION(NOP,)
 
 SM83_INSTRUCTION_IMPLEMENTATION(LDBC_PART2, 
-    cpu->BC.PAIR = cpu->read16(cpu->PC.PAIR);
-    cpu->PC.PAIR += 2;
-    cpu->executionState = SM83_READ_PC;
-    cpu->instruction = 
+
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(LDBC, 
-    cpu->executionState = SM83_READ_PC;
-    cpu->instruction = SM83_INSTRUCTION_DECLARATION(LDBC_PART2)
+
 )
 
 // **********************************

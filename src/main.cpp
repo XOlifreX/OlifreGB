@@ -1,14 +1,12 @@
-#include "window/emu_window.h"
-
 #include <iostream>
+#include <emulator.h>
 
 int main()
 {
-    EmuWindow* w = new EmuWindow();
+    Emulator* e = new Emulator();
+    e->run();
 
-    w->runWindow();
-
-    delete w;
+    delete e;
 
     return 0;
 }

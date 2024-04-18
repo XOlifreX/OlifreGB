@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SM83_H
 #define SM83_H
 
@@ -5,7 +6,7 @@
 
 #include "global.h"
 
-#pragma pack(push, 1);
+#pragma pack(push, 1)
 union FlagRegister {
     struct {
 #ifdef __BIG_ENDIAN__
@@ -24,7 +25,7 @@ union FlagRegister {
     };
     u8 flag;
 };
-#pragma pack(pop);
+#pragma pack(pop)
 
 #ifdef __BIG_ENDIAN__
 #define SM83_AF_REGISTER union { \
@@ -40,7 +41,7 @@ union FlagRegister {
         u8 HIGH; \
         u8 LOW; \
     }; \
-    u16 PAIR; \
+    u16 P; \
 };
 #else
 #define SM83_AF_REGISTER union { \
@@ -56,7 +57,7 @@ union FlagRegister {
         u8 LOW; \
         u8 HIGH; \
     }; \
-    u16 PAIR; \
+    u16 HIGH ## LOW; \
 };
 #endif // __BIG_ENDIAN__
 
@@ -75,6 +76,7 @@ struct RegisterFile {
 #pragma pack(pop)
 };
 
+class SM83Cpu;
 typedef void (*SM83Instruction)(SM83Cpu*);
 
 enum SM83ExecutionState {
