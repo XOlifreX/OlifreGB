@@ -15,5 +15,10 @@ public:
     GB();
     ~GB();
 
+    void run();
+    void pause();
+    void reset();
     void setCartridge(Cartridge* cart);
+    void saveState(const char* path);
+    void loadState(const char* path);
 };
