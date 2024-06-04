@@ -1,8 +1,11 @@
 #include <iostream>
+#include <csignal>
 #include <emulator.h>
 
 int main(int argc, char* argv[])
 {
+    std::cout << "Starting" << std::endl;
+    
     if (argc == 1) {
         std::cerr << "Please provide a valid path to a .gb rom." << std::endl;
         return 1;
@@ -12,15 +15,11 @@ int main(int argc, char* argv[])
     std::cout << argc << std::endl;
 
     Emulator* e = new Emulator();
-    bool result = e->loadRom(rom);
-
-    if (!result) {
-        return 1;
-    }
+    e->loadRom(rom);
 
     e->run();
 
     delete e;
 
     return 0;
-}
+} 

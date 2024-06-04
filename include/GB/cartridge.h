@@ -1,18 +1,41 @@
 #pragma once
+#ifndef CARTRIDGE_H
+#define CARTRIDGE_H
+
 #include <iostream>
+#include <fstream>
+#include "utils.h"
 
 class Cartridge {
 private:
-    bool initialized;
+    bool  initialized;
     char* data;
-    int size;
 
+    int   entrypoint;
+    char* nLogo;
+    char* title;
+    char* mCode;
+    char  gbcFlag;
+    short licenseCode;
+    char  sgbFlag;
+    char  type;
+    int   romSize;
+    int   ramSize;
+    char  destinationCode;
+    char  oldLicenseCode;
+    char  romVersion;
+    char  checksum;
+    short gChecksum;
+
+    void loadCartridge(char* path);
 public:
-    Cartridge();
+    Cartridge(char* path);
     ~Cartridge();
 
-    void setCartridge(char* data, int size);
+    void printCartridgeData();
 
     char readByte(int address);
     void writeByte(int address, char value);
 };
+
+#endif // CARTRIDGE_H

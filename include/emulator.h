@@ -1,5 +1,6 @@
 #pragma once
-#include <fstream>
+#ifndef EMULATOR_H
+#define EMULATOR_H
 
 #include "GB/GB.h"
 #include "GB/cartridge.h"
@@ -14,6 +15,8 @@ public:
     Emulator();
     ~Emulator();
 
-    bool loadRom(const char* rom);
+    void loadRom(const char* rom);
     void run();
 };
+
+#endif // EMULATOR_H
