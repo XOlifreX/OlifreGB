@@ -4,7 +4,86 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstring>
+#include <map>
+
+#include "global.h"
 #include "utils.h"
+
+enum PublisherKey {
+    None = 0,
+    NintendoRD1,
+    Capcom,
+    EA,
+    HudsonSoft1,
+    B_AI,
+    KSS,
+    PlanningOfficeWADA,
+    PCMComplete,
+    San_X,
+    Kemco,
+    SETACorporation,
+    Viacom,
+    Nintendo,
+    Bandai,
+    OceanAcclaim,
+    Konami1,
+    HectorSoft,
+    Taito,
+    HudsonSoft2,
+    Banpresto,
+    UbiSoft1,
+    Atlus,
+    MalibuInteractive,
+    Angel,
+    BulletProofSoftware,
+    Irem,
+    Absolute,
+    AcclaimEntertainment,
+    Activision,
+    SammyUSA,
+    Konami2,
+    HiTechExpressions,
+    LJN,
+    Matchbox,
+    Mattel,
+    MiltonBradleyCompany,
+    TitusInteractive,
+    VirginGames,
+    LucasfilmGames,
+    OceanSoftware,
+    Infogrames,
+    InterplayEntertainment,
+    Broderbund,
+    SculpturedSoftware,
+    TheSalesCurve,
+    THQ,
+    Accolade,
+    MisawaEntertainment,
+    lozc,
+    TokumaShoten,
+    TsukudaOriginal,
+    Chunsoft,
+    VideoSystem,
+    OceanAcclaim2,
+    Varie,
+    YonezawaSpal,
+    Kaneko,
+    PackInVideo,
+    BottomUp,
+    KonamiYuGiOh,
+    MTO,
+    Kodansha,
+    UNKNOWN
+};
+
+extern const char* publisherNames[];
+extern const char* ramSizeNames[];
+
+struct RomSizeInfo {
+    const char* name;
+    u16 size;
+};
 
 class Cartridge {
 private:
@@ -16,7 +95,7 @@ private:
     char* title;
     char* mCode;
     char  gbcFlag;
-    short licenseCode;
+    char* licenseCode;
     char  sgbFlag;
     char  type;
     int   romSize;
@@ -27,9 +106,14 @@ private:
     char  checksum;
     short gChecksum;
 
-    void loadCartridge(char* path);
+    std::map<int, const char*> cartridgeTypes;
+    std::map<int, RomSizeInfo> ROMSizes;
+    std::map<int, const char*> oldLicenseeCodes;
+
+    PublisherKey getPublisherKey(const char* key);
+    void loadCartridge(const char* path);
 public:
-    Cartridge(char* path);
+    Cartridge(const char* path);
     ~Cartridge();
 
     void printCartridgeData();

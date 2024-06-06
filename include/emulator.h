@@ -9,6 +9,7 @@
 class Emulator {
 private:
     GB* gameboy;
+    Cartridge* cartridge;
     EmuWindow* window;
 
 public:

@@ -18,11 +18,9 @@ Emulator::~Emulator() {
 // ******************************
 
 void Emulator::loadRom(const char* rom) {
-    if (rom != NULL) {
-        delete rom;
-    }
-    
-    // this->cartridge = new Cartridge(rom);
+    this->cartridge = new Cartridge(rom);
+
+    this->cartridge->printCartridgeData();
 }
 
 void Emulator::run() {
