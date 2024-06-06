@@ -72,9 +72,9 @@ const char* publisherNames[] = {
 const char* ramSizeNames[] = {
     "0",
     "-",
-    "8 KiB"
-    "32 KiB"
-    "128 KiB"
+    "8 KiB",
+    "32 KiB",
+    "128 KiB",
     "64 KiB"
 };
 
