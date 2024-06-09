@@ -9,41 +9,16 @@
 #pragma pack(push, 1)
 union FlagRegister {
     struct {
-#ifdef __BIG_ENDIAN__
-        u8 Z : 1;
-        u8 N : 1;
-        u8 H : 1;
-        u8 C : 1;
-        u8 _ : 4;
-#else
         u8 _ : 4;
         u8 C : 1;
         u8 H : 1;
         u8 N : 1;
         u8 Z : 1;
-#endif // __BIG_ENDIAN__
     };
     u8 flag;
 };
 #pragma pack(pop)
 
-#ifdef __BIG_ENDIAN__
-#define SM83_AF_REGISTER union { \
-    struct { \
-        u8 A; \
-        union FlagRegister F; \
-    }; \
-    u16 AF; \
-};
-
-#define SM83_REGISTER_PAIR(HIGH, LOW) union { \
-    struct { \
-        u8 HIGH; \
-        u8 LOW; \
-    }; \
-    u16 P; \
-};
-#else
 #define SM83_AF_REGISTER union { \
     struct { \
         union FlagRegister F; \
@@ -54,30 +29,25 @@ union FlagRegister {
 
 #define SM83_REGISTER_PAIR(HIGH, LOW) union { \
     struct { \
-        u8 LOW; \
         u8 HIGH; \
+        u8 LOW; \
     }; \
     u16 HIGH ## LOW; \
-};
-#endif // __BIG_ENDIAN__
-
-#define SM83_REGISTER_FILE struct { \
-    SM83_AF_REGISTER; \
-    SM83_REGISTER_PAIR(B, C); \
-    SM83_REGISTER_PAIR(D, E); \
-    SM83_REGISTER_PAIR(H, L); \
-    u16 SP; \
-    u16 PC; \
 };
 
 struct RegisterFile {
 #pragma pack(push, 1)
-    SM83_REGISTER_FILE;
+    SM83_AF_REGISTER;
+    SM83_REGISTER_PAIR(B, C);
+    SM83_REGISTER_PAIR(D, E);
+    SM83_REGISTER_PAIR(H, L);
+    u16 SP;
+    u16 PC;
 #pragma pack(pop)
 };
 
 class SM83Cpu;
-typedef void (*SM83Instruction)(SM83Cpu*);
+typedef void (SM83Instruction)(SM83Cpu*);
 
 enum SM83ExecutionState {
 	SM83_FETCH = 3,
@@ -96,15 +66,11 @@ enum SM83ExecutionState {
 class SM83Cpu {
 public:
 #pragma pack(push, 1)
-    union {
-        struct RegisterFile registers;
-        SM83_REGISTER_FILE;
-    };
+    struct RegisterFile registers;
 #pragma pack(pop)
 
     SM83ExecutionState state;
     SM83Instruction instruction;
 };
-#undef SM83_REGISTER_FILE
 
 #endif // SM83_H
