@@ -1,11 +1,12 @@
 #pragma once
 #include "SM83.h"
-#include "Cartridge.h"
+#include "cartridge.h"
+#include "bus.h"
 
 class GB {
 private:
     SM83Cpu* cpu;
-    Cartridge* cartridge;
+    Bus* bus;
     
     bool paused;
     bool running;

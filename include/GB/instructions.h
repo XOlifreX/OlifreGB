@@ -14,6 +14,14 @@ struct SM83Opcode {
     SM83Instruction** steps;
 };
 
+#define IS_CARRY_SET_ADDITION_U8(REGISTER, VALUE) \
+    ((((0xFF00 & (0 << 8 )) | (0x00FF & (cpu->registers.B)) + VALUE) \
+        & 0x0100) == 0x0100) ? 1 : 0;
+
+#define IS_CARRY_SET_SUBSTRACTION_U8(REGISTER, VALUE) \
+    ((((0xFF00 & (0 << 8 )) | (0x00FF & (cpu->registers.B)) - VALUE) \
+        & 0x8000) == 0x8000) ? 1 : 0;
+
 #define SM83_INSTRUCTION_DECLARATION(NAME) \
     SM83_Instruction_ ## NAME
 
@@ -23,6 +31,7 @@ struct SM83Opcode {
 #define SM83_INSTRUCTION_IMPLEMENTATION(NAME, BODY) \
     static void SM83_Instruction_ ## NAME (SM83Cpu* cpu) { \
         BODY; \
+        cpu->registers.PC++; \
     }
     
 #define SM83_INSTRUCTION_STEPS_IMPLEMENTATION(NAME, ...) \

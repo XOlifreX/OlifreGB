@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "global.h"
+#include "bus.h"
 
 #pragma pack(push, 1)
 union FlagRegister {
@@ -63,14 +64,22 @@ enum SM83ExecutionState {
 	SM83_HALT_BUG = 27,
 };
 
+struct CpuContext {
+    u8 current_step;
+    SM83Instruction current_instruction;
+};
+
 class SM83Cpu {
 public:
 #pragma pack(push, 1)
     struct RegisterFile registers;
 #pragma pack(pop)
 
-    SM83ExecutionState state;
-    SM83Instruction instruction;
+    CpuContext context;
+    Bus* bus;
+
+    SM83Cpu(Bus* bus);
+    ~SM83Cpu();
 };
 
 #endif // SM83_H

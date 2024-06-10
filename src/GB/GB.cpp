@@ -5,13 +5,12 @@
 // ******************************
 
 GB::GB() {
-    this->cpu = new SM83Cpu();
-    this->cartridge = NULL;
+    this->bus = new Bus();
+    this->cpu = new SM83Cpu(this->bus);
 }
 
 GB::~GB() {
     delete this->cpu;
-    delete this->cartridge;
 }
 
 // ******************************
@@ -19,5 +18,5 @@ GB::~GB() {
 // ******************************
 
 void GB::setCartridge(Cartridge* cart) {
-    this->cartridge = cart;
+    this->bus->setCartridge(cart);
 }
