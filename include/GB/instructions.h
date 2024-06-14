@@ -16,12 +16,12 @@ struct SM83Opcode {
 
 #define IS_CARRY_SET_ADDITION_U8(REGISTER, VALUE) \
     ((u16)REGISTER + VALUE) >= 0x100 ? 1 : 0;
-    // ((((0xFF00 & (0 << 8 )) | (0x00FF & (REGISTER)) + VALUE) \
+    // ((((0xFF00 & (0 << 8 )) | (0x00FF & (REGISTER)) + VALUE)
     //     & 0x0100) == 0x0100) ? 1 : 0;
 
 #define IS_CARRY_SET_SUBSTRACTION_U8(REGISTER, VALUE) \
-    ((u16)REGISTER - VALUE) < 0 ? 1 : 0
-    // ((((0xFF00 & (0 << 8 )) | (0x00FF & (REGISTER)) - VALUE) \
+    ((u16)REGISTER - VALUE) < 0 ? 1 : 0;
+    // ((((0xFF00 & (0 << 8 )) | (0x00FF & (REGISTER)) - VALUE)
     //     & 0x8000) == 0x8000) ? 1 : 0;
 
 #define SM83_INSTRUCTION_DECLARATION(NAME) \
