@@ -27,17 +27,32 @@ struct SM83Opcode {
 #define SM83_INSTRUCTION_DECLARATION(NAME) \
     SM83_Instruction_ ## NAME
 
+#define SM83_CB_INSTRUCTION_DECLARATION(NAME) \
+    SM83_CB_Instruction_ ## NAME
+
 #define SM83_INSTRUCTION_STEPS_DECLARATION(NAME) \
     SM83_Instruction_Steps_ ## NAME
+
+#define SM83_CB_INSTRUCTION_STEPS_DECLARATION(NAME) \
+    SM83_CB_Instruction_Steps_ ## NAME
 
 #define SM83_INSTRUCTION_IMPLEMENTATION(NAME, BODY) \
     static void SM83_Instruction_ ## NAME (SM83Cpu* cpu) { \
         BODY; \
         cpu->registers.PC++; \
     }
+
+#define SM83_CB_INSTRUCTION_IMPLEMENTATION(NAME, BODY) \
+    static void SM83_CB_Instruction_ ## NAME (SM83Cpu* cpu) { \
+        BODY; \
+        cpu->registers.PC++; \
+    }
     
 #define SM83_INSTRUCTION_STEPS_IMPLEMENTATION(NAME, ...) \
     const static SM83Instruction* SM83_Instruction_Steps_ ## NAME[] = { __VA_ARGS__ }
+
+#define SM83_CB_INSTRUCTION_STEPS_IMPLEMENTATION(NAME, ...) \
+    const static SM83Instruction* SM83_CB_Instruction_Steps_ ## NAME[] = { __VA_ARGS__ }
     
 #define SM83_INSTRUCTION_INFO(OPCODE, NAME, SIZE, CYCLES, STEPS) \
     { OPCODE, NAME, SIZE, CYCLES, STEPS }

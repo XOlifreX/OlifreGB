@@ -50,23 +50,10 @@ struct RegisterFile {
 class SM83Cpu;
 typedef void (SM83Instruction)(SM83Cpu*);
 
-enum SM83ExecutionState {
-	SM83_FETCH = 3,
-	SM83_IDLE_0 = 0,
-	SM83_IDLE_1 = 1,
-	SM83_EXECUTE = 2,
-
-	SM83_MEMORY_LOAD = 7,
-	SM83_MEMORY_STORE = 11,
-	SM83_READ_PC = 15,
-	SM83_STALL = 19,
-	SM83_OP2 = 23,
-	SM83_HALT_BUG = 27,
-};
-
 struct CpuContext {
-    u8 current_step;
-    SM83Instruction current_instruction;
+    u8 currentStep;
+    SM83Instruction* currentInstruction;
+    bool finished;
 };
 
 class SM83Cpu {
