@@ -15,8 +15,8 @@ public:
 
     void setCartridge(Cartridge* cartridge);
 
-    u8 readMemoryU8(int address);
-    void writeMemoryU8(int address, u8 data);
+    u8 readMemoryU8(u16 address);
+    void writeMemoryU8(u16 address, u8 data);
 };
 
 #endif // SM83_H

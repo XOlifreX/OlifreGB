@@ -26,10 +26,10 @@ void Bus::setCartridge(Cartridge* cartridge) {
     this->cartridge = cartridge;
 }
 
-u8 Bus::readMemoryU8(int address) {
+u8 Bus::readMemoryU8(u16 address) {
     this->cartridge->readByte(address);
 }
 
-void Bus::writeMemoryU8(int address, u8 data) {
+void Bus::writeMemoryU8(u16 address, u8 data) {
     return this->cartridge->writeByte(address, data);
 }

@@ -53,6 +53,7 @@ typedef void (SM83Instruction)(SM83Cpu*);
 struct CpuContext {
     u8 currentStep;
     SM83Instruction* currentInstruction;
+    SM83_REGISTER_PAIR(T, P);
     bool finished;
 };
 
@@ -60,9 +61,9 @@ class SM83Cpu {
 public:
 #pragma pack(push, 1)
     struct RegisterFile registers;
+    CpuContext context;
 #pragma pack(pop)
 
-    CpuContext context;
     Bus* bus;
 
     SM83Cpu(Bus* bus);

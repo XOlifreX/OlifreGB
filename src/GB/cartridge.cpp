@@ -377,7 +377,7 @@ void Cartridge::printCartridgeData() {
     std::cout << "Old licensee: " << this->oldLicenseeCodes[this->oldLicenseCode] << std::endl;
 }
 
-char Cartridge::readByte(int address) {
+char Cartridge::readByte(u16 address) {
     if (address > this->romSize || address < 0) {
         std::cerr << "Out of bounds READ:" << std::endl;
         std::cerr << "Address:  0x" << std::hex << address << std::endl;
@@ -389,7 +389,7 @@ char Cartridge::readByte(int address) {
     return this->data[address];
 }
 
-void Cartridge::writeByte(int address, char value) {
+void Cartridge::writeByte(u16 address, u8 value) {
     if (address > this->romSize || address < 0) {
         std::cerr << "Out of bounds WRITE:" << std::endl;
         std::cerr << "Address:  0x" << std::hex << address << std::endl;

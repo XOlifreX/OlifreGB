@@ -118,8 +118,8 @@ public:
 
     void printCartridgeData();
 
-    char readByte(int address);
-    void writeByte(int address, char value);
+    char readByte(u16 address);
+    void writeByte(u16 address, u8 value);
 };
 
 #endif // CARTRIDGE_H

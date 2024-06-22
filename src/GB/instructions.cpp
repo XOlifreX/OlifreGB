@@ -65,8 +65,10 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 // *****
 
 // 0x04: INC B
-SM83_INSTRUCTION_IMPLEMENTATION(INCB,
-    cpu->registers.F.C = IS_CARRY_SET_ADDITION_U8(cpu->registers.B, 1);
+SM83_INSTRUCTION_IMPLEMENTATION(INCB,)
+
+SM83_INSTRUCTION_IMPLEMENTATION(INCB_P2,
+    cpu->registers.F.C = IS_CARRY_SET_ADD_U8(cpu->registers.B, 1);
     cpu->registers.B++;
 
     cpu->registers.F.Z = (cpu->registers.B & 0xFF) == 0x00 ? 0 : 1;
@@ -75,14 +77,15 @@ SM83_INSTRUCTION_IMPLEMENTATION(INCB,
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     INCB,
-    SM83_INSTRUCTION_DECLARATION(INCB)
+    SM83_INSTRUCTION_DECLARATION(INCB),
+    SM83_INSTRUCTION_DECLARATION(INCB_P2)
 );
 
 // *****
 
 // 0x05: DEC B
 SM83_INSTRUCTION_IMPLEMENTATION(DECB,
-    cpu->registers.F.C = IS_CARRY_SET_SUBSTRACTION_U8(cpu->registers.B, 1);
+    cpu->registers.F.C = IS_CARRY_SET_SUB_U8(cpu->registers.B, 1);
     cpu->registers.B--;
 
     cpu->registers.F.Z = (cpu->registers.B & 0xFF) == 0x00 ? 0 : 1;
@@ -115,12 +118,12 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 SM83_INSTRUCTION_IMPLEMENTATION(RLCA,)
 
 SM83_INSTRUCTION_IMPLEMENTATION(RLCA_P2,
-    u16 shifted = (cpu->registers.A  << 1) | (cpu->registers.A >> 7);
+    u16 shifted = (cpu->registers.A >> 7) | (cpu->registers.A  << 1);
 
     cpu->registers.F.Z = 0;
     cpu->registers.F.N = 0;
     cpu->registers.F.H = 0;
-    cpu->registers.F.C = (cpu->registers.A & 0xF0) == 1;
+    cpu->registers.F.C = (shifted > 0xFF) ? 1 : 0;
     
     cpu->registers.A = shifted;
 )
@@ -137,33 +140,23 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 SM83_INSTRUCTION_IMPLEMENTATION(LDASP16,)
 
 SM83_INSTRUCTION_IMPLEMENTATION(LDASP16_P2,
-    cpu->registers.C = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(LDASP16_P3,
-    cpu->registers.C = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(LDASP16_P4,
-    u16 shifted = (cpu->registers.A  << 1) | (cpu->registers.A >> 7);
+    u8 lsb = 0x0F & cpu->registers.SP;
+    cpu->bus->writeMemoryU8(cpu->context.TP, lsb);
 
-    cpu->registers.F.Z = 0;
-    cpu->registers.F.N = 0;
-    cpu->registers.F.H = 0;
-    cpu->registers.F.C = (cpu->registers.A & 0xF0) == 1;
-    
-    cpu->registers.A = shifted;
+    cpu->context.TP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(LDASP16_P5,
-    u16 shifted = (cpu->registers.A  << 1) | (cpu->registers.A >> 7);
-
-    cpu->registers.F.Z = 0;
-    cpu->registers.F.N = 0;
-    cpu->registers.F.H = 0;
-    cpu->registers.F.C = (cpu->registers.A & 0xF0) == 1;
-    
-    cpu->registers.A = shifted;
+    u8 msb = (0xF0 & cpu->registers.SP) >> 8;
+    cpu->bus->writeMemoryU8(cpu->context.TP, msb);
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -181,7 +174,11 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 SM83_INSTRUCTION_IMPLEMENTATION(ADDHLBC,)
 
 SM83_INSTRUCTION_IMPLEMENTATION(ADDHLBC_P2,
-    cpu->registers.C = cpu->bus->readMemoryU8(cpu->registers.PC);
+    u32 result = cpu->registers.HL + cpu->registers.BC;
+
+    cpu->registers.F.N = 0;
+    cpu->registers.F.H = (result > 0x0FFF) ? 1 : 0;
+    cpu->registers.F.C = (result > 0xFFFF) ? 1 : 0;
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -192,8 +189,12 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // *****
 
-// 0x0A: DLABC
+// 0x0A: LD A, [BC]
 SM83_INSTRUCTION_IMPLEMENTATION(DLABCp,)
+
+SM83_INSTRUCTION_IMPLEMENTATION(DLABCp_P2,
+    cpu->registers.A = cpu->bus->readMemoryU8(cpu->registers.BC);
+)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     DLABCp, 
@@ -202,28 +203,50 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // *****
 
-// 0x0B: DECBC
+// 0x0B: DEC BC
 SM83_INSTRUCTION_IMPLEMENTATION(DECBC,)
+
+SM83_INSTRUCTION_IMPLEMENTATION(DECBC_P2,
+    cpu->registers.BC--;
+)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     DECBC, 
-    SM83_INSTRUCTION_DECLARATION(DECBC)
+    SM83_INSTRUCTION_DECLARATION(DECBC),
+    SM83_INSTRUCTION_DECLARATION(DECBC_P2)
 );
 
 // *****
 
-// 0x0C: INCC
+// 0x0C: INC C
 SM83_INSTRUCTION_IMPLEMENTATION(INCC,)
+
+SM83_INSTRUCTION_IMPLEMENTATION(INCC_P2,
+    cpu->registers.F.C = IS_CARRY_SET_ADD_U8(cpu->registers.C, 1)
+    cpu->registers.C--;
+
+    cpu->registers.F.Z = (cpu->registers.C & 0xFF) == 0x00 ? 0 : 1;
+    cpu->registers.F.N = 1;
+)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     INCC, 
-    SM83_INSTRUCTION_DECLARATION(INCC)
+    SM83_INSTRUCTION_DECLARATION(INCC),
+    SM83_INSTRUCTION_DECLARATION(INCC_P2)
 );
 
 // *****
 
-// 0x0D: DECC
+// 0x0D: DEC C
 SM83_INSTRUCTION_IMPLEMENTATION(DECC,)
+
+SM83_INSTRUCTION_IMPLEMENTATION(DECC_P2,
+    cpu->registers.F.C = IS_CARRY_SET_SUB_U8(cpu->registers.C, 1)
+    cpu->registers.C--;
+
+    cpu->registers.F.Z = (cpu->registers.C & 0xFF) == 0x00 ? 0 : 1;
+    cpu->registers.F.N = 0;
+)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     DECC, 
@@ -235,19 +258,35 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 // 0x0E: LDC8
 SM83_INSTRUCTION_IMPLEMENTATION(LDC8,)
 
+SM83_INSTRUCTION_IMPLEMENTATION(LDC8_P2,
+    cpu->registers.C = cpu->bus->readMemoryU8(cpu->registers.PC);
+)
+
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     LDC8, 
-    SM83_INSTRUCTION_DECLARATION(LDC8)
+    SM83_INSTRUCTION_DECLARATION(LDC8),
+    SM83_INSTRUCTION_DECLARATION(LDC8_P2)
 );
 
 // *****
 
 // 0x0F: RRCA
 SM83_INSTRUCTION_IMPLEMENTATION(RRCA,)
+SM83_INSTRUCTION_IMPLEMENTATION(RRCA_P2,
+    u8 shifted = (cpu->registers.A << 7) | (cpu->registers.A  >> 1);
+
+    cpu->registers.F.Z = 0;
+    cpu->registers.F.N = 0;
+    cpu->registers.F.H = 0;
+    cpu->registers.F.C = cpu->registers.A & 0x01;
+    
+    cpu->registers.A = shifted;
+)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     RRCA, 
-    SM83_INSTRUCTION_DECLARATION(RRCA)
+    SM83_INSTRUCTION_DECLARATION(RRCA),
+    SM83_INSTRUCTION_DECLARATION(RRCA_P2),
 );
 
 // **********************************
