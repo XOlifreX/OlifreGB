@@ -120,10 +120,20 @@ struct SM83Opcode {
         cpu->registers.PC++; \
     }
 
+#define SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(NAME, BODY) \
+    static void SM83_Instruction_ ## NAME (SM83Cpu* cpu) { \
+        BODY; \
+    }
+
 #define SM83_CB_INSTRUCTION_IMPLEMENTATION(NAME, BODY) \
     static void SM83_CB_Instruction_ ## NAME (SM83Cpu* cpu) { \
         BODY; \
         cpu->registers.PC++; \
+    }
+
+#define SM83_CB_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(NAME, BODY) \
+    static void SM83_CB_Instruction_ ## NAME (SM83Cpu* cpu) { \
+        BODY; \
     }
     
 #define SM83_INSTRUCTION_STEPS_IMPLEMENTATION(NAME, ...) \
