@@ -25,7 +25,7 @@ union FlagRegister {
         union FlagRegister F; \
         u8 A; \
     }; \
-    u16 AF; \
+    u16 FA; \
 };
 
 #define SM83_REGISTER_PAIR(HIGH, LOW) union { \
