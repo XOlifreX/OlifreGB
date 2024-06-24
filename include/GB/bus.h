@@ -16,6 +16,7 @@ public:
     void setCartridge(Cartridge* cartridge);
 
     u8 readMemoryU8(u16 address);
+    s8 readMemoryS8(u16 address);
     void writeMemoryU8(u16 address, u8 data);
 };
 
