@@ -54,7 +54,7 @@ struct CpuContext {
     u8 currentStep;
     SM83Instruction* currentInstruction;
     SM83_REGISTER_PAIR(T, P);
-    bool finished;
+    bool instruction_exit_early;
 };
 
 class SM83Cpu {
