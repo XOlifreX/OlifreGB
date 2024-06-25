@@ -101,13 +101,13 @@ struct SM83Opcode {
     REGISTER = REGISTER | (1 << INDEX); 
 
 #define SM83_INC8(REGISTER, FLAGS) \
-    FLAGS.H = IS_CARRY_SET_ADD_U8(REGISTER, 1); \
+    FLAGS.C = IS_CARRY_SET_ADD_U8(REGISTER, 1); \
     REGISTER++; \
     FLAGS.Z = (REGISTER & 0xFF) == 0x00 ? 0 : 1; \
     FLAGS.N = 0;
 
 #define SM83_DEC8(REGISTER, FLAGS) \
-    FLAGS.H = IS_CARRY_SET_SUB_U8(REGISTER, 1); \
+    FLAGS.C = IS_CARRY_SET_SUB_U8(REGISTER, 1); \
     REGISTER--; \
     FLAGS.Z = (REGISTER & 0xFF) == 0x00 ? 0 : 1; \
     FLAGS.N = 1;
