@@ -961,7 +961,50 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0x27: DAA
 SM83_INSTRUCTION_IMPLEMENTATION(DAA,
+    u8 msb = (cpu->registers.A & 0xF0) >> 0x4;
+    u8 lsb = cpu->registers.A & 0x0F;
 
+    // Purely for making the code shorter
+    u8 N = cpu->registers.F.N;
+    u8 C = cpu->registers.F.C;
+    u8 H = cpu->registers.F.H;
+
+    if ((N == 0 && C == 0 && msb < 0x0A && H == 0 && msb < 0x0A) || 
+        (N == 1 && C == 0 && msb < 0x0A && H == 0 && msb < 0x0A)) {
+        cpu->registers.F.C = 0;
+        cpu->registers.A += 0x00;
+    }
+    else if ((N == 0 && C == 0 && msb < 0x09 && H == 0 && lsb >  0x09) ||
+             (N == 0 && C == 0 && msb < 0x0A && H == 1 && lsb <  0x04)) {
+        cpu->registers.F.C = 0;
+        cpu->registers.A += 0x06;
+    }
+    else if ((N == 0 && C == 0 && msb > 0x09 && H == 0 && lsb <  0x0A) ||
+             (N == 1 && C == 0 && msb < 0x03 && H == 0 && lsb <  0x0A)) {
+        cpu->registers.F.C = 1;
+        cpu->registers.A += 0x60;
+    }
+    else if ((N == 0 && C == 0 && msb > 0x08 && H == 0 && lsb >  0x09) ||
+             (N == 0 && C == 0 && msb > 0x09 && H == 1 && lsb <  0x04) ||
+             (N == 0 && C == 1 && msb < 0x03 && H == 0 && lsb >  0x09) ||
+             (N == 0 && C == 1 && msb < 0x04 && H == 1 && lsb <  0x04)) {
+        cpu->registers.F.C = 1;
+        cpu->registers.A += 0x66;
+    }
+    else if ( N == 1 && C == 0 && msb < 0x09 && H == 1 && lsb >  0x05) {
+        cpu->registers.F.C = 0;
+        cpu->registers.A += 0xFA;
+    }
+    else if ( N == 1 && C == 1 && msb > 0x06 && H == 0 && lsb <  0x0A) {
+        cpu->registers.F.C = 1;
+        cpu->registers.A += 0xA0;
+    }
+    else {
+        cpu->registers.F.C = 1;
+        cpu->registers.A += 0x9A;
+    }
+
+    cpu->registers.F.Z = cpu->registers.A == 0x0 ? 1 : 0; 
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
