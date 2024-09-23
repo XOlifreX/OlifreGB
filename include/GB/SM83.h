@@ -3,6 +3,7 @@
 #define SM83_H
 
 #include <vector>
+#include <iostream>
 
 #include "global.h"
 #include "bus.h"
@@ -57,6 +58,8 @@ struct CpuContext {
     bool instruction_exit_early;
 };
 
+#include "instructions.h"
+
 class SM83Cpu {
 public:
 #pragma pack(push, 1)
@@ -68,6 +71,8 @@ public:
 
     SM83Cpu(Bus* bus);
     ~SM83Cpu();
+
+    void tick();
 };
 
 #endif // SM83_H

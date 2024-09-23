@@ -2,15 +2,26 @@
 #ifndef EMULATOR_H
 #define EMULATOR_H
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include <iostream>
+
 #include "GB/GB.h"
 #include "GB/cartridge.h"
-#include "window/emu_window.h"
 
 class Emulator {
 private:
     GB* gameboy;
     Cartridge* cartridge;
-    EmuWindow* window;
+    
+    // UI
+    GLFWwindow* window;
+    static unsigned int SCR_WIDTH;
+    static unsigned int SCR_HEIGHT;
+
+    int initWindow();
+    void processInput();
 
 public:
     Emulator();
@@ -18,6 +29,8 @@ public:
 
     void loadRom(const char* rom);
     void run();
+
+    void tick();
 };
 
 #endif // EMULATOR_H

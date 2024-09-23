@@ -5858,7 +5858,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
  * e8  = 8bit signed
 */
 
-const SM83Opcode opcodesTable8Bit[] = {
+const SM83Opcode opcodesTable[] = {
     // 0x00
     SM83_INSTRUCTION_INFO(0x00, "NOP",          1, 1, SM83_INSTRUCTION_STEPS_DECLARATION(NOP)),
     SM83_INSTRUCTION_INFO(0x01, "LD BC, n16",   3, 3, SM83_INSTRUCTION_STEPS_DECLARATION(LDBC16)),
@@ -6150,7 +6150,7 @@ const SM83Opcode opcodesTable8Bit[] = {
 
 // **********************************
 
-const SM83Opcode cbOpcodesTable8Bit[] = {
+const SM83Opcode opcodesCbTable[] = {
     // 0x00
     SM83_INSTRUCTION_INFO(0x00, "RLC B",         2, 2, SM83_CB_INSTRUCTION_STEPS_DECLARATION(RLCB)),
     SM83_INSTRUCTION_INFO(0x01, "RLC C",         2, 2, SM83_CB_INSTRUCTION_STEPS_DECLARATION(RLCC)),

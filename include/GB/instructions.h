@@ -4,15 +4,6 @@
 
 #include<vector>
 #include "global.h"
-#include "GB/SM83.h"
-
-struct SM83Opcode {
-    u8 opcode;
-    const char* name;
-    u8 size;
-    u8 cycles;
-    SM83Instruction** steps;
-};
 
 // ********************
 
@@ -163,6 +154,19 @@ struct SM83Opcode {
     
 #define SM83_INSTRUCTION_INFO(OPCODE, NAME, SIZE, CYCLES, STEPS) \
     { OPCODE, NAME, SIZE, CYCLES, STEPS }
+
+// *****    
+
+#include "GB/SM83.h"
+
+struct SM83Opcode {
+    u8 opcode;
+    const char* name;
+    u8 size;
+    u8 cycles;
+    SM83Instruction** steps;
+};
+
 
 extern const SM83Opcode opcodesTable[];
 extern const SM83Opcode opcodesCbTable[];

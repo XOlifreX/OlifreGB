@@ -20,3 +20,7 @@ GB::~GB() {
 void GB::setCartridge(Cartridge* cart) {
     this->bus->setCartridge(cart);
 }
+
+void GB::run() {
+    this->cpu->tick();
+}
