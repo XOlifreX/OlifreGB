@@ -110,6 +110,22 @@
     FLAGS.C = (result > 0xFFFF) ? 1 : 0; \
     REGISTER1 = result;
 
+#define SM83_ADD_R8_R8(REGISTER1, REGISTER2, FLAGS) \
+    u16 result = REGISTER1 + REGISTER2; \
+    FLAGS.Z = IS_CARRY_SET_ADD_U8(REGISTER1, REGISTER2); \
+    FLAGS.N = 0; \
+    FLAGS.H = (result > 0x0F) ? 1 : 0; \
+    FLAGS.C = (result > 0xFF) ? 1 : 0; \
+    REGISTER1 = result;
+
+#define SM83_ADD_R8_R8_WITH_CARRY(REGISTER1, REGISTER2, FLAGS) \
+    u16 result = REGISTER1 + REGISTER2 + FLAGS.C; \
+    FLAGS.Z = IS_CARRY_SET_ADD_U8(REGISTER1, REGISTER2); \
+    FLAGS.N = 0; \
+    FLAGS.H = (result > 0x0F) ? 1 : 0; \
+    FLAGS.C = (result > 0xFF) ? 1 : 0; \
+    REGISTER1 = result;
+
 // ********************
 
 #define SM83_INSTRUCTION_DECLARATION(NAME) \

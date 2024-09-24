@@ -117,40 +117,52 @@ Cartridge::Cartridge(const char* path) {
 
     RomSizeInfo info;
     info.name = "32 KiB";
-    info.size = 2;
+    info.banks = 2;
+    info.size = 32768;
     this->ROMSizes[0x00] = info;
     info.name = "64 KiB";
-    info.size = 4;
+    info.banks = 4;
+    info.size = 65536;
     this->ROMSizes[0x01] = info;
     info.name = "128 KiB";
-    info.size = 8;
+    info.banks = 8;
+    info.size = 131072;
     this->ROMSizes[0x02] = info;
     info.name = "256 KiB";
-    info.size = 16;
+    info.banks = 16;
+    info.size = 262144;
     this->ROMSizes[0x03] = info;
     info.name = "512 KiB";
-    info.size = 32;
+    info.banks = 32;
+    info.size = 524288;
     this->ROMSizes[0x04] = info;
     info.name = "1 MiB";
-    info.size = 64;
+    info.banks = 64;
+    info.size = 1048576;
     this->ROMSizes[0x05] = info;
     info.name = "2 MiB";
-    info.size = 128;
+    info.banks = 128;
+    info.size = 2097152;
     this->ROMSizes[0x06] = info;
     info.name = "4 MiB";
-    info.size = 256;
+    info.banks = 256;
+    info.size = 4194304;
     this->ROMSizes[0x07] = info;
     info.name = "8 MiB";
-    info.size = 512;
+    info.banks = 512;
+    info.size = 8388608;
     this->ROMSizes[0x08] = info;
     info.name = "1.1 MiB";
-    info.size = 72;
+    info.banks = 72;
+    info.size = 1153434;
     this->ROMSizes[0x52] = info;
     info.name = "1.2 MiB";
-    info.size = 80;
+    info.banks = 80;
+    info.size = 1258292;
     this->ROMSizes[0x53] = info;
     info.name = "1.5 MiB";
-    info.size = 96;
+    info.banks = 96;
+    info.size = 1572864;
     this->ROMSizes[0x54] = info;
 
     this->oldLicenseeCodes[0x00] = "None";
@@ -357,6 +369,8 @@ void Cartridge::loadCartridge(const char* path) {
     this->romVersion = buffer[0x14C];
     this->checksum = buffer[0x14D];
     this->gChecksum = charsToShort(buffer, size, 0x14E);
+
+    this->data = buffer;
 }
 
 // ******************************
@@ -378,10 +392,11 @@ void Cartridge::printCartridgeData() {
 }
 
 char Cartridge::readByte(u16 address) {
-    if (address > this->romSize || address < 0) {
+    int actualRomSize = this->ROMSizes[this->romSize].size;
+    if (address > actualRomSize || address < 0) {
         std::cerr << "Out of bounds READ:" << std::endl;
         std::cerr << "Address:  0x" << std::hex << address << std::endl;
-        std::cerr << "ROM size: 0x" << std::hex << this->romSize;
+        std::cerr << "ROM size: 0x" << std::hex << actualRomSize;
 
         exit(1);
     }
@@ -390,10 +405,11 @@ char Cartridge::readByte(u16 address) {
 }
 
 void Cartridge::writeByte(u16 address, u8 value) {
-    if (address > this->romSize || address < 0) {
+    int actualRomSize = this->ROMSizes[this->romSize].size;
+    if (address > actualRomSize || address < 0) {
         std::cerr << "Out of bounds WRITE:" << std::endl;
         std::cerr << "Address:  0x" << std::hex << address << std::endl;
-        std::cerr << "ROM size: 0x" << std::hex << this->romSize;
+        std::cerr << "ROM size: 0x" << std::hex << actualRomSize;
 
         exit(1);
     }

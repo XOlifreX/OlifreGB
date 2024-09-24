@@ -82,7 +82,8 @@ extern const char* ramSizeNames[];
 
 struct RomSizeInfo {
     const char* name;
-    u16 size;
+    u32 size;
+    u16 banks;
 };
 
 class Cartridge {

@@ -7,13 +7,19 @@
 
 #include <iostream>
 
-#include "GB/GB.h"
 #include "GB/cartridge.h"
+#include "GB/SM83.h"
+#include "GB/bus.h"
 
 class Emulator {
 private:
-    GB* gameboy;
+    Bus* bus;
+    SM83Cpu* cpu;
     Cartridge* cartridge;
+
+    bool paused;
+    bool running;
+    u64 ticks;
     
     // UI
     GLFWwindow* window;
@@ -29,6 +35,8 @@ public:
 
     void loadRom(const char* rom);
     void run();
+    void pause();
+    void reset();
 
     void tick();
 };
