@@ -25,6 +25,8 @@ SM83Cpu::SM83Cpu(Bus* bus) {
     c.CBMode = false;
 
     this->context = c;
+
+    this->IME = true;
 }
 
 SM83Cpu::~SM83Cpu() {

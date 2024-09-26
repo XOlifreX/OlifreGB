@@ -13,8 +13,8 @@
 #define IS_CARRY_SET_SUB_U8(REGISTER, VALUE) \
     ((s16)REGISTER - VALUE) < 0 ? 1 : 0;
 
-#define IS_CARRY_SET_ADD_U8_SIGNED(REGISTER, VALUE) \
-    ((s16)REGISTER + VALUE) >= 0x100 ? 1 : 0;
+#define IS_CARRY_SET_ADD_U16_SIGNED(REGISTER, VALUE) \
+    ((s16)REGISTER + VALUE) >= 0x10000 ? 1 : 0;
 
 // ********************
 
@@ -184,11 +184,11 @@
     FLAGS.Z = result == 0x0; \
     REGISTER = result;
 
-#define SM83_ADD_R8_IMM8_SIGNED(REGISTER, VALUE, FLAGS) \
-    s16 result = REGISTER + VALUE; \
-    FLAGS.C = IS_CARRY_SET_ADD_U8_SIGNED(REGISTER, VALUE); \
+#define SM83_ADD_R16_IMM8_SIGNED(REGISTER, VALUE, FLAGS) \
+    s32 result = REGISTER + VALUE; \
+    FLAGS.C = IS_CARRY_SET_ADD_U16_SIGNED(REGISTER, VALUE); \
     FLAGS.N = 0; \
-    FLAGS.H = (result > 0x0F) ? 1 : 0; \
+    FLAGS.H = (result > 0x00FF) ? 1 : 0; \
     FLAGS.Z = 0; \
     REGISTER = result;
 

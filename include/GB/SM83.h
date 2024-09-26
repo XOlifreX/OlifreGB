@@ -68,6 +68,7 @@ public:
     CpuContext context;
 #pragma pack(pop)
 
+    bool IME;
     Bus* bus;
 
     SM83Cpu(Bus* bus);
