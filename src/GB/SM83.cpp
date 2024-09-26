@@ -22,6 +22,7 @@ SM83Cpu::SM83Cpu(Bus* bus) {
     c.currentInstruction = NULL;
     c.TP = 0x0;
     c.instruction_exit_early = false;
+    c.CBMode = false;
 
     this->context = c;
 }

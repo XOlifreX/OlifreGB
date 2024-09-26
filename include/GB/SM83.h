@@ -56,6 +56,7 @@ struct CpuContext {
     SM83Instruction* currentInstruction;
     SM83_REGISTER_PAIR(T, P);
     bool instruction_exit_early;
+    bool CBMode;
 };
 
 #include "instructions.h"
