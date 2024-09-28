@@ -35,14 +35,46 @@ SM83Cpu::~SM83Cpu() {
 
 // *****
 
+// Perform one CPU cycle
 void SM83Cpu::tick() {
-    int instruction = this->bus->readMemoryU8(this->registers.PC);
+    // Get instruction
+    if (this->context.currentInstruction == NULL) {
+        u8 instruction = this->bus->readMemoryU8(this->registers.PC);
+        this->context.currentInstruction = &opcodesTable[instruction];
+        
+        this->context.currentStep = 0;
+        this->context.CBMode = false;
+        this->context.instruction_exit_early = false;
+        
+        std::cout << std::endl << std::endl << "PC:  0x" << std::hex << this->registers.PC << ": " << this->context.currentInstruction->name << std::endl;
+    }
 
-    SM83Opcode opcode = opcodesTable[instruction];
+    // Get CB prefix instruction
+    if (this->context.CBMode) {
+        u8 instruction = this->bus->readMemoryU8(this->registers.PC);
+        this->context.currentInstruction = &opcodesCbTable[instruction];
 
-    std::cout << "PC:  0x" << std::hex << this->registers.PC << ": " << opcode.name << std::endl;
-    for (u8 i = 0; i < opcode.cycles; i++) {
-        std::cout << "    Executing " << std::dec << i+1 << " of " << opcode.name << std::endl;
-        (*(opcode.steps)[i])(this);
+        this->context.currentStep = 0;
+        this->context.CBMode = false;
+        this->context.instruction_exit_early = false;
+      
+        std::cout << "PC:  0x" << std::hex << this->registers.PC << ": " << this->context.currentInstruction->name << " (CB Prefix)" << std::endl;
+    }
+
+    // Execute one instruction cycle
+    std::cout << "    Executing " << std::dec << this->context.currentStep << " of " << this->context.currentInstruction->name << std::endl;
+    (*(this->context.currentInstruction->steps)[this->context.currentStep])(this);
+
+    this->context.currentStep++;
+
+    // Early instruction exit
+    if (this->context.instruction_exit_early) {
+        std::cout << "    Early exit" << std::endl;
+        this->context.instruction_exit_early = false;
+        this->context.currentInstruction = NULL;
+    }
+
+    if (this->context.currentStep == this->context.currentInstruction->cycles) {
+        this->context.currentInstruction = NULL;
     }
 }

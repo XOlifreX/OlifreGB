@@ -18,11 +18,11 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 SM83_INSTRUCTION_IMPLEMENTATION(LDBC16,)
 
 SM83_INSTRUCTION_IMPLEMENTATION(LDBC16_P2, 
-    cpu->registers.C = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.B = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(LDBC16_P3, 
-    cpu->registers.B = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.C = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -450,11 +450,11 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 SM83_INSTRUCTION_IMPLEMENTATION(LDDE16,)
 
 SM83_INSTRUCTION_IMPLEMENTATION(LDDE16_P2, 
-    cpu->registers.E = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.D = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(LDDE16_P3, 
-    cpu->registers.D = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.E = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -872,11 +872,11 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 SM83_INSTRUCTION_IMPLEMENTATION(LDHL16,)
 
 SM83_INSTRUCTION_IMPLEMENTATION(LDHL16_P2, 
-    cpu->registers.L = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.H = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(LDHL16_P3, 
-    cpu->registers.H = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.L = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 
@@ -5673,6 +5673,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 SM83_INSTRUCTION_IMPLEMENTATION(RETI,)
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETI_P2,
+    cpu->IME = true;
     cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )

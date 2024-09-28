@@ -296,15 +296,6 @@
 
 #include "GB/SM83.h"
 
-struct SM83Opcode {
-    u8 opcode;
-    const char* name;
-    u8 size;
-    u8 cycles;
-    SM83Instruction** steps;
-};
-
-
 extern const SM83Opcode opcodesTable[];
 extern const SM83Opcode opcodesCbTable[];
 

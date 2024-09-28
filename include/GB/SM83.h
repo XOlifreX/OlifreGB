@@ -51,9 +51,17 @@ struct RegisterFile {
 class SM83Cpu;
 typedef void (SM83Instruction)(SM83Cpu*);
 
+struct SM83Opcode {
+    u8 opcode;
+    const char* name;
+    u8 size;
+    u8 cycles;
+    SM83Instruction** steps;
+};
+
 struct CpuContext {
-    u8 currentStep;
-    SM83Instruction* currentInstruction;
+    u16 currentStep;
+    const SM83Opcode* currentInstruction;
     SM83_REGISTER_PAIR(T, P);
     bool instruction_exit_early;
     bool CBMode;
