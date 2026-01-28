@@ -12,11 +12,12 @@
 #include "GB/bus.h"
 
 class Emulator {
-private:
+protected:
     Bus* bus;
     SM83Cpu* cpu;
     Cartridge* cartridge;
-
+    
+private:
     bool paused;
     bool running;
     u64 ticks;
@@ -27,8 +28,8 @@ private:
     static unsigned int SCR_WIDTH;
     static unsigned int SCR_HEIGHT;
 
-    int initWindow();
     void processInput();
+    int initGLWindow();
 
 public:
     Emulator();

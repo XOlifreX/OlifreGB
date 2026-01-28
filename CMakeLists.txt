@@ -11,12 +11,6 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-if(WIN32)
-    target_compile_definitions(OlifreGB PRIVATE WIN32_OS)
-elseif(UNIX)
-    target_compile_definitions(OlifreGB PRIVATE UNIX_OS)
-endif()
-
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(GLM REQUIRED)
@@ -24,8 +18,14 @@ find_package(glad REQUIRED)
 
 include_directories(include ${OPENGL_INCLUDE_DIRS} ${GLFW3_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${GLAD_INCLUDE_DIRS})
 
-file(GLOB SOURCES src/*.cpp src/GB/*.cpp src/window/*.cpp)
+file(GLOB SOURCES src/*.cpp src/GB/*.cpp src/GB/memory/*.cpp src/window/*.cpp src/lib/*.cpp src/test/*.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${GLAD_SOURCE_FILE})
 
 target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARY} ${GLFW3_LIBRARIES} opengl32 gdi32 user32)
+
+if(WIN32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE WIN32_OS)
+elseif(UNIX)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE UNIX_OS)
+endif()

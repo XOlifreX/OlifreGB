@@ -79,10 +79,14 @@ public:
     bool IME;
     Bus* bus;
 
+    long tCycle;
+    long mCycle;
+
     SM83Cpu(Bus* bus);
     ~SM83Cpu();
 
     void tick();
+    void debug_print_state();
 };
 
 #endif // SM83_H

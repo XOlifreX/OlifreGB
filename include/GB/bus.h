@@ -3,10 +3,12 @@
 #define BUS_H
 
 #include "GB/cartridge.h"
+#include "GB/memory/RAM.h"
 
 class Bus {
 private:
     Cartridge* cartridge;
+    Memory* ram;
 
 public:
     Bus();
@@ -20,4 +22,4 @@ public:
     void writeMemoryU8(u16 address, u8 data);
 };
 
-#endif // SM83_H
+#endif // BUS_H

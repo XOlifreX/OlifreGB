@@ -27,6 +27,9 @@ SM83Cpu::SM83Cpu(Bus* bus) {
     this->context = c;
 
     this->IME = true;
+
+    this->tCycle = 0;
+    this->mCycle = 0;
 }
 
 SM83Cpu::~SM83Cpu() {
@@ -35,7 +38,7 @@ SM83Cpu::~SM83Cpu() {
 
 // *****
 
-// Perform one CPU cycle
+// Perform one M-cycle
 void SM83Cpu::tick() {
     // Get instruction
     if (this->context.currentInstruction == NULL) {
@@ -77,4 +80,23 @@ void SM83Cpu::tick() {
     if (this->context.currentStep == this->context.currentInstruction->cycles) {
         this->context.currentInstruction = NULL;
     }
+
+    this->tCycle += 4;
+    this->mCycle++;
+
+    this->debug_print_state();
+}
+
+void SM83Cpu::debug_print_state() {
+    std::cout << "*************************" << std::endl;
+    std::cout << "Steps: " << std::dec << this->context.currentStep << std::endl;
+    std::cout << "TP:    0x" << std::hex << this->context.TP << std::endl;
+    std::cout << "*************************" << std::endl;
+    std::cout << "PC:    0x" << std::hex << this->registers.PC << std::endl;
+    std::cout << "SP:    0x" << std::hex << this->registers.SP << std::endl;
+    std::cout << "AF:    0x" << std::hex << this->registers.FA << std::endl;
+    std::cout << "BC:    0x" << std::hex << this->registers.BC << std::endl;
+    std::cout << "DE:    0x" << std::hex << this->registers.DE << std::endl;
+    std::cout << "HL:    0x" << std::hex << this->registers.HL << std::endl;
+    std::cout << "**************************************************" << std::endl;
 }

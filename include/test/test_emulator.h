@@ -14,8 +14,8 @@ public:
     TestEmulator();
     ~TestEmulator();
 
-    void setCPU();
-    void setBus();
+    void setCPU(SM83Cpu* _cpu);
+    void setBus(Bus* _bus);
 
     SM83Cpu* getCPU();
     Bus* getBus();

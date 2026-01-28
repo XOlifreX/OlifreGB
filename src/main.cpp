@@ -2,8 +2,13 @@
 #include <csignal>
 #include <emulator.h>
 
+#include <test/sm83_tests.h>
+
 int main(int argc, char* argv[])
 {
+    run_sm83_tests();
+    return 0;
+
     std::cout << "Starting" << std::endl;
     
     if (argc <= 4) {

@@ -14,7 +14,7 @@ void framebuffer_size_callback(GLFWwindow* w, int width, int height)
 unsigned int Emulator::SCR_WIDTH = 800;
 unsigned int Emulator::SCR_HEIGHT = 600;
 
-int Emulator::initWindow()
+int Emulator::initGLWindow()
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -22,18 +22,18 @@ int Emulator::initWindow()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     this->window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "OlifreGB", NULL, NULL);
-    if (this->window == NULL)
-    {
+    if (this->window == NULL) {
         glfwTerminate();
         throw std::invalid_argument( "Failed to create GLFW window" );
     }
+
     glfwMakeContextCurrent(this->window);
     glfwSetFramebufferSizeCallback(this->window, framebuffer_size_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
         throw std::invalid_argument( "Failed to initialize GLAD" );
-    }
+
+    return 0;
 }
 
 void Emulator::run() {
@@ -54,7 +54,7 @@ void Emulator::processInput()
     if(glfwGetKey(this->window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(this->window, true);
     if(glfwGetKey(this->window, GLFW_KEY_N) == GLFW_PRESS)
-       this->tick();
+        this->tick();
 }
 
 // ******************************

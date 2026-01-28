@@ -28,7 +28,7 @@ void Emulator::initWindow() {
     if (this->windowInitialized)
         return;
 
-    this->initWindow();
+    this->initGLWindow();
 }
 
 void Emulator::loadRom(const char* rom) {
