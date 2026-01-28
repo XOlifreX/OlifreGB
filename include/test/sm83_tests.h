@@ -8,6 +8,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <sstream>
+#include <cstring>
+#include <cstdlib>
 
 extern void run_sm83_tests();
 
