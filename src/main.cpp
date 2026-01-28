@@ -15,8 +15,9 @@ int main(int argc, char* argv[])
     std::cout << argc << std::endl;
 
     Emulator* e = new Emulator();
+    e->initWindow();
     e->loadRom(rom);
-
+    
     e->run();
 
     delete e;

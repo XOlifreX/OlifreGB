@@ -22,6 +22,7 @@ private:
     u64 ticks;
     
     // UI
+    bool windowInitialized;
     GLFWwindow* window;
     static unsigned int SCR_WIDTH;
     static unsigned int SCR_HEIGHT;
@@ -33,6 +34,7 @@ public:
     Emulator();
     ~Emulator();
 
+    void initWindow();
     void loadRom(const char* rom);
     void run();
     void pause();

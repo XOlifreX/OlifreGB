@@ -11,17 +11,25 @@ Emulator::Emulator() {
     this->paused = false;
     this->running = true;
     this->ticks = 0;
-    
-    this->initWindow();
+
+    this->windowInitialized = false;
 }
 Emulator::~Emulator() {
     delete this->cpu;
     delete this->bus;
 
-    glfwTerminate();
+    if (this->windowInitialized)
+        glfwTerminate();
 }
 
 // ******************************
+
+void Emulator::initWindow() {
+    if (this->windowInitialized)
+        return;
+
+    this->initWindow();
+}
 
 void Emulator::loadRom(const char* rom) {
     this->cartridge = new Cartridge(rom);

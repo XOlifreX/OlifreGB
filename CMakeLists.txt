@@ -11,6 +11,12 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+if(WIN32)
+    target_compile_definitions(OlifreGB PRIVATE WIN32_OS)
+elseif(UNIX)
+    target_compile_definitions(OlifreGB PRIVATE UNIX_OS)
+endif()
+
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(GLM REQUIRED)
