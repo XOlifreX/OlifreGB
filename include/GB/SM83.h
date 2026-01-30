@@ -34,8 +34,8 @@ union FlagRegister {
 
 #define SM83_REGISTER_PAIR(HIGH, LOW) union { \
     struct { \
-        u8 HIGH; \
         u8 LOW; \
+        u8 HIGH; \
     }; \
     u16 HIGH ## LOW; \
 };

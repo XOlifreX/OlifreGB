@@ -4,12 +4,15 @@
 // ******************************
 // ******************************
 
-void run_sm83_test(SM83TestCase test) {
+bool run_sm83_test(SM83TestCase test) {
     Cartridge* cartridge = new Cartridge(NULL);
     Bus* bus = new Bus(cartridge);
     SM83Cpu* cpu = new SM83Cpu(bus);
 
     bool passed = true;
+
+    if (test.name.compare("04 54 70") == 0)
+        int i = 0;
 
     // **************************
     // Init CPU state
@@ -81,14 +84,22 @@ void run_sm83_test(SM83TestCase test) {
 
     // deletes bus too
     delete cpu;
+
+    return passed;
 }
 
 void run_sm83_test_cases(std::vector<SM83TestCase> tests) {
+    u16 successCount = 0;
+    
     for (std::vector<SM83TestCase>::const_iterator it2 = tests.begin(); it2 != tests.end(); ++it2) {
         SM83TestCase tCase = *it2;
         
-        run_sm83_test(tCase);
+        bool temp = run_sm83_test(tCase);
+
+        successCount += temp ? 1 : 0;
     }
+
+    std::cout << std::dec << successCount << "/" << tests.size() << " (" << ((successCount / tests.size()) * 100) << "%) PASSED!" << std::endl;
 }
 
 // **********
@@ -99,7 +110,7 @@ void run_sm83_tests() {
     // Get list of JSON files
     // std::vector<std::string> files = getFileListOfDirectory(testPath.c_str());
     std::vector<std::string> files; 
-    files.push_back("01.json");
+    files.push_back("06.json");
 
     std::cout << "Found " << files.size() << " test files." << std::endl;
     for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it) {
