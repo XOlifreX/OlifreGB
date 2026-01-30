@@ -4,12 +4,15 @@
 
 #include "GB/memory/memory.h"
 
+#include <iostream>
 #include <malloc.h>
 
 #define INTERUPT_ENABLE_REGISTER 0xFFFF
 
 #define RAM_RANGE_FROM 0x4000
 #define RAM_RANGE_TO 0xFFFF
+
+#define RAM_FULL_SIZE (RAM_RANGE_TO - RAM_RANGE_FROM + 1)
 
 class RAM: public Memory {
 public:

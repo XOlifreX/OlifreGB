@@ -15,14 +15,17 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 // *****
 
 // 0x01: LD BC, n16
-SM83_INSTRUCTION_IMPLEMENTATION(LDBC16,)
-
-SM83_INSTRUCTION_IMPLEMENTATION(LDBC16_P2, 
-    cpu->registers.B = cpu->bus->readMemoryU8(cpu->registers.PC);
+SM83_INSTRUCTION_IMPLEMENTATION(LDBC16, 
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION(LDBC16_P3, 
-    cpu->registers.C = cpu->bus->readMemoryU8(cpu->registers.PC);
+SM83_INSTRUCTION_IMPLEMENTATION(LDBC16_P2, 
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.PC);
+)
+
+SM83_INSTRUCTION_IMPLEMENTATION(LDBC16_P3,
+    cpu->registers.C = cpu->registers.Z;
+    cpu->registers.B = cpu->registers.W;
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(

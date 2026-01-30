@@ -8,6 +8,9 @@
 #include "global.h"
 #include "bus.h"
 
+#define SM83_DEFAULT_N_TCYCLES_FOR_1_MCYCLE 4
+#define SM83_CCB_N_TCYCLES_FOR_1_MCYCLE 2
+
 #pragma pack(push, 1)
 union FlagRegister {
     struct {
@@ -45,6 +48,7 @@ struct RegisterFile {
     SM83_REGISTER_PAIR(H, L);
     u16 SP;
     u16 PC;
+    SM83_REGISTER_PAIR(W, Z);
 #pragma pack(pop)
 };
 
@@ -81,6 +85,7 @@ public:
 
     long tCycle;
     long mCycle;
+    u8 tCycleNumForOneMCycle;
 
     SM83Cpu(Bus* bus);
     ~SM83Cpu();

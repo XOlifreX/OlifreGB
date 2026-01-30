@@ -5,18 +5,27 @@
 // ******************************
 
 Bus::Bus() {
-    this->cartridge = NULL;
-    this->ram = new RAM();
+    this->init(NULL);
 }
 
 Bus::Bus(Cartridge* cartridge) {
-    this->cartridge = cartridge;
+    this->init(cartridge);
 }
 
 Bus::~Bus() {
     if (this->cartridge != NULL) {
         delete this->cartridge;
     }
+}
+
+
+void Bus::init(Cartridge* cartridge) {
+    this->cartridge = cartridge;
+    this->ram = new RAM();
+
+    this->lastAction.action = BA_None;
+    this->lastAction.address = 0xFFFF;
+    this->lastAction.value = 0xFF;
 }
 
 // ******************************
@@ -27,42 +36,71 @@ void Bus::setCartridge(Cartridge* cartridge) {
     this->cartridge = cartridge;
 }
 
-u8 Bus::readMemoryU8(u16 address) {
-    if (address >= 0x0000 && address <= 0x3FFF) {
+u8 Bus::readMemoryU8(u16 address, bool saveAction) {
+    u8 value = 0xFF;
+
+    if (address >= CARTRIDGE_RANGE_FROM && address <= CARTRIDGE_RANGE_TO) {
         if (this->cartridge == NULL) {
             std::cout << "WARNING: Trying to access cartridge data when no ROM is available. Returning 0xFF" << std::endl;
 
-            return 0xFF;
+            return value;
         }
 
-        return (u8) this->cartridge->readByte(address);
+        value = (u8) this->cartridge->readByte(address);
+    }
+    else {
+        value = (u8) this->ram->readMemoryU8(address - CARTRIDGE_RANGE_TO);
     }
 
-    return (u8) this->ram->readMemoryU8(address);
+    if (saveAction) {
+        this->lastAction.action = BA_Read;
+        this->lastAction.address = address;
+        this->lastAction.value = value;
+    }
+
+    return value;
 }
 
-s8 Bus::readMemoryS8(u16 address) {
-    if (address >= 0x0000 && address <= 0x3FFF) {
+s8 Bus::readMemoryS8(u16 address, bool saveAction) {
+    u8 value = 0xFF;
+
+    if (address >= CARTRIDGE_RANGE_FROM && address <= CARTRIDGE_RANGE_TO) {
         if (this->cartridge == NULL) {
             std::cout << "WARNING: Trying to access cartridge data when no ROM is available. Returning 0xFF" << std::endl;
 
-            return 0xFF;
+            return value;
         }
         
-        return (s8) this->cartridge->readByte(address);
+        value = (s8) this->cartridge->readByte(address);
     }
-    
-    return (s8) this->ram->readMemoryU8(address);
+    else {
+        value = (s8) this->ram->readMemoryU8(address - CARTRIDGE_RANGE_TO);
+    }
+
+    if (saveAction) {
+        this->lastAction.action = BA_Read;
+        this->lastAction.address = address;
+        this->lastAction.value = value;
+    }
+    return value;
 }
 
-void Bus::writeMemoryU8(u16 address, u8 data) {
-    if (address >= 0x0000 && address <= 0x3FFF) {
+void Bus::writeMemoryU8(u16 address, u8 value, bool saveAction) {
+    if (address >= CARTRIDGE_RANGE_FROM && address <= CARTRIDGE_RANGE_TO) {
         if (this->cartridge == NULL) {
             std::cout << "WARNING: Trying to write to cartridge data when no ROM is available." << std::endl;
             return;
         }
         
-        this->cartridge->writeByte(address, data);
-        return;
+        this->cartridge->writeByte(address, value);
+    }
+    else {
+        this->ram->writeMemoryU8(address - CARTRIDGE_RANGE_TO, value);
+    }
+
+    if (saveAction) {
+        this->lastAction.action = BA_Write;
+        this->lastAction.address = address;
+        this->lastAction.value = value;
     }
 }

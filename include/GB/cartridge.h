@@ -10,6 +10,9 @@
 #include "global.h"
 #include "utils.h"
 
+#define CARTRIDGE_RANGE_FROM 0x0000
+#define CARTRIDGE_RANGE_TO 0x4000
+
 enum PublisherKey {
     None = 0,
     NintendoRD1,
@@ -114,6 +117,7 @@ private:
     PublisherKey getPublisherKey(const char* key);
     void loadCartridge(const char* path);
 public:
+    Cartridge();
     Cartridge(const char* path);
     ~Cartridge();
 

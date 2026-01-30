@@ -255,7 +255,11 @@ Cartridge::Cartridge(const char* path) {
     this->oldLicenseeCodes[0xA6] = "Kawada";
     this->oldLicenseeCodes[0xA7] = "Takara";
 
-    if (path == NULL) return;
+    if (path == NULL) {
+        this->data = (char*)malloc(sizeof(u8) * 0x4000);
+        this->romSize = 0x06;
+        return;
+    }
 
     this->loadCartridge(path);
 }
