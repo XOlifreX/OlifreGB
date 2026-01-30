@@ -7,7 +7,7 @@
 bool run_sm83_test(SM83TestCase test) {
     Cartridge* cartridge = new Cartridge(NULL);
     Bus* bus = new Bus(cartridge);
-    SM83Cpu* cpu = new SM83Cpu(bus);
+    SM83Cpu* cpu = new SM83Cpu(bus, false);
 
     bool passed = true;
 
@@ -77,9 +77,7 @@ bool run_sm83_test(SM83TestCase test) {
         passed &= val == ram.value;
     }
 
-    if (passed)
-        std::cout << "Test " << test.name << ": PASSED" << std::endl;
-    else
+    if (!passed)
         std::cout << "Test " << test.name << ": FAILED" << std::endl;
 
     // deletes bus too
@@ -109,8 +107,7 @@ void run_sm83_tests() {
     
     // Get list of JSON files
     // std::vector<std::string> files = getFileListOfDirectory(testPath.c_str());
-    std::vector<std::string> files; 
-    files.push_back("06.json");
+    std::vector<std::string> files;
 
     std::cout << "Found " << files.size() << " test files." << std::endl;
     for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it) {
@@ -126,8 +123,6 @@ void run_sm83_tests() {
             std::cout << "  Test " << file << " returned empty test cases. Skipping." << std::endl;
             continue;
         }
-        else
-            std::cout << "Running Name " << tests[0].name << std::endl;
         
         run_sm83_test_cases(tests);
     }

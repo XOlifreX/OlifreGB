@@ -87,7 +87,9 @@ public:
     long mCycle;
     u8 tCycleNumForOneMCycle;
 
-    SM83Cpu(Bus* bus);
+    bool debugPrint;
+
+    SM83Cpu(Bus* bus, bool debugPrint = true);
     ~SM83Cpu();
 
     void tick();

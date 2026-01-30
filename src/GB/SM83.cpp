@@ -1,6 +1,6 @@
 #include "GB/SM83.h"
 
-SM83Cpu::SM83Cpu(Bus* bus) {
+SM83Cpu::SM83Cpu(Bus* bus, bool debugPrint) {
     this->bus = bus;
 
     // *******************
@@ -32,6 +32,8 @@ SM83Cpu::SM83Cpu(Bus* bus) {
     this->tCycle = 0;
     this->mCycle = 0;
     this->tCycleNumForOneMCycle = SM83_DEFAULT_N_TCYCLES_FOR_1_MCYCLE;
+
+    this->debugPrint = debugPrint;
 }
 
 SM83Cpu::~SM83Cpu() {
@@ -51,18 +53,21 @@ void SM83Cpu::tick() {
         this->context.CBMode = false;
         this->context.instruction_exit_early = false;
       
-        std::cout << "PC:  0x" << std::hex << this->registers.PC << ": " << this->context.currentInstruction->name << " (CB Prefix)" << std::endl;
+        if (this->debugPrint)
+            std::cout << "PC:  0x" << std::hex << this->registers.PC << ": " << this->context.currentInstruction->name << " (CB Prefix)" << std::endl;
     }
 
     // Execute one instruction M-cycle
-    std::cout << "    Executing " << std::dec << this->context.currentStep << " of " << this->context.currentInstruction->name << std::endl;
+    if (this->debugPrint)
+        std::cout << "    Executing " << std::dec << this->context.currentStep << " of " << this->context.currentInstruction->name << std::endl;
     (*(this->context.currentInstruction->steps)[this->context.currentStep])(this);
 
     this->context.currentStep++;
     
     // Early instruction exit
     if (this->context.instruction_exit_early) {
-        std::cout << "    Early exit" << std::endl;
+        if (this->debugPrint)
+            std::cout << "    Early exit" << std::endl;
         this->context.currentStep = this->context.currentInstruction->cycles;
     }
 
@@ -78,10 +83,12 @@ void SM83Cpu::tick() {
         this->context.CBMode = false;
         this->context.instruction_exit_early = false;
         
-        std::cout << std::endl << std::endl << "PC:  0x" << std::hex << this->registers.PC << ": " << this->context.currentInstruction->name << std::endl;
+        if (this->debugPrint)
+            std::cout << std::endl << std::endl << "PC:  0x" << std::hex << this->registers.PC << ": " << this->context.currentInstruction->name << std::endl;
     }
 
-    this->debug_print_state();
+    if (this->debugPrint)
+        this->debug_print_state();
 }
 
 void SM83Cpu::debug_print_state() {
