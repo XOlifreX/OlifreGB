@@ -62,7 +62,14 @@ void SM83Cpu::tick() {
         std::cout << "    Executing " << std::dec << this->context.currentStep << " of " << this->context.currentInstruction->name << std::endl;
     (*(this->context.currentInstruction->steps)[this->context.currentStep])(this);
 
-    this->context.currentStep++;
+    // In case an instruction exits early, set steps forward to propper exit M-cycle
+    if (this->context.skipSteps > 0) {
+        this->context.currentStep += this->context.skipSteps;
+        this->context.skipSteps = 0;
+    }
+    else {
+        this->context.currentStep++;
+    }
     
     // Early instruction exit
     if (this->context.instruction_exit_early) {

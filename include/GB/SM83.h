@@ -60,6 +60,7 @@ struct SM83Opcode {
     const char* name;
     u8 size;
     u8 cycles;
+    u8 earlyExitSkipSteps;
     SM83Instruction** steps;
 };
 
@@ -68,6 +69,7 @@ struct CpuContext {
     const SM83Opcode* currentInstruction;
     SM83_REGISTER_PAIR(T, P);
     bool instruction_exit_early;
+    u8 skipSteps;
     bool CBMode;
 };
 

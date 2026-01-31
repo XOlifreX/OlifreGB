@@ -35,16 +35,16 @@
     REGISTER = shifted;
 
 #define SM83_RL(REGISTER, FLAGS) \
-    u16 shifted = (REGISTER << 1) | (REGISTER >> 7); \
-    FLAGS.Z = shifted == 0x00; \
+    u16 shifted = (REGISTER << 1) | FLAGS.C; \
+    FLAGS.Z = 0; \
     FLAGS.N = 0; \
     FLAGS.H = 0; \
-    FLAGS.C = (shifted > 0xFF) ? 1 : 0; \
+    FLAGS.C = REGISTER >> 7; \
     REGISTER = (u8)shifted;
 
 #define SM83_RR(REGISTER, FLAGS) \
-    u16 shifted = (REGISTER >> 1) | (REGISTER << 7); \
-    FLAGS.Z = shifted == 0x00; \
+    u16 shifted = (REGISTER >> 1) | (FLAGS.C << 7); \
+    FLAGS.Z = 0; \
     FLAGS.N = 0; \
     FLAGS.H = 0; \
     FLAGS.C = REGISTER & 0x01; \
@@ -287,8 +287,8 @@
 #define SM83_CB_INSTRUCTION_STEPS_IMPLEMENTATION(NAME, ...) \
     const static SM83Instruction* SM83_CB_Instruction_Steps_ ## NAME[] = { __VA_ARGS__ }
     
-#define SM83_INSTRUCTION_INFO(OPCODE, NAME, SIZE, CYCLES, STEPS) \
-    { OPCODE, NAME, SIZE, CYCLES, STEPS }
+#define SM83_INSTRUCTION_INFO(OPCODE, NAME, SIZE, CYCLES, EARLY_EXIT_SKIP, STEPS) \
+    { OPCODE, NAME, SIZE, CYCLES, EARLY_EXIT_SKIP, STEPS }
 
 // *****    
 

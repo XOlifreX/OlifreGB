@@ -11,7 +11,7 @@ bool run_sm83_test(SM83TestCase test) {
 
     bool passed = true;
 
-    if (test.name.compare("04 54 70") == 0)
+    if (test.name.compare("20 22 11") == 0)
         int i = 0;
 
     // **************************
@@ -108,6 +108,22 @@ void run_sm83_tests() {
     // Get list of JSON files
     // std::vector<std::string> files = getFileListOfDirectory(testPath.c_str());
     std::vector<std::string> files;
+    files.push_back("20.json");
+    // files.push_back("21.json");
+    // files.push_back("22.json");
+    // files.push_back("23.json");
+    // files.push_back("24.json");
+    // files.push_back("25.json");
+    // files.push_back("26.json");
+    // files.push_back("27.json");
+    // files.push_back("28.json");
+    // files.push_back("29.json");
+    // files.push_back("2A.json");
+    // files.push_back("2B.json");
+    // files.push_back("2C.json");
+    // files.push_back("2D.json");
+    // files.push_back("2E.json");
+    // files.push_back("2F.json");
 
     std::cout << "Found " << files.size() << " test files." << std::endl;
     for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it) {
