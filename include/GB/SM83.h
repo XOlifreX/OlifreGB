@@ -46,7 +46,7 @@ struct RegisterFile {
     SM83_REGISTER_PAIR(B, C);
     SM83_REGISTER_PAIR(D, E);
     SM83_REGISTER_PAIR(H, L);
-    u16 SP;
+    SM83_REGISTER_PAIR(S, P);
     u16 PC;
     SM83_REGISTER_PAIR(W, Z);
 #pragma pack(pop)

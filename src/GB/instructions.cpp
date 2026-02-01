@@ -1057,11 +1057,13 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 // *****
 
 // 0x29: ADD HL, HL
-SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(ADDHLHL,
-    SM83_ADD_R16_R16(cpu->registers.HL, cpu->registers.HL, cpu->registers.F)
+SM83_INSTRUCTION_IMPLEMENTATION(ADDHLHL,
+     SM83_ADD_R8_R8(cpu->registers.L, cpu->registers.L, cpu->registers.F)
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION(ADDHLHL_P2,)
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(ADDHLHL_P2,
+    SM83_ADD_R8_R8_WITH_CARRY(cpu->registers.H, cpu->registers.H, cpu->registers.F)
+)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     ADDHLHL,
@@ -1343,21 +1345,30 @@ SM83_CB_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0x30: JR NC, e8
 SM83_INSTRUCTION_IMPLEMENTATION(JRNC8,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.PC);
-    cpu->context.instruction_exit_early = cpu->registers.F.C != 0x00;
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.PC);
+    
+    // Expected check fails (so it's not zero)
+    if (cpu->registers.F.C) {
+        cpu->context.skipSteps = 2;
+    }
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(JRNC8_P2,
-    cpu->registers.PC += (s8) cpu->context.T;
+    cpu->registers.PC += (s8) cpu->registers.Z;
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION(JRNC8_P3,)
+SM83_INSTRUCTION_IMPLEMENTATION(JRNC8_P3,
+    cpu->context.instruction_exit_early = true;
+)
+
+SM83_INSTRUCTION_IMPLEMENTATION(JRNC8_P4,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     JRNC8,
     SM83_INSTRUCTION_DECLARATION(JRNC8),
     SM83_INSTRUCTION_DECLARATION(JRNC8_P2),
-    SM83_INSTRUCTION_DECLARATION(JRNC8_P3)
+    SM83_INSTRUCTION_DECLARATION(JRNC8_P3),
+    SM83_INSTRUCTION_DECLARATION(JRNC8_P4)
 );
 
 // *****
@@ -1419,15 +1430,13 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0x34: INC [HL]
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(INCHLp,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.HL);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.HL);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(INCHLp_P2,
-    cpu->context.P++;
+    SM83_INC8(cpu->registers.Z, cpu->registers.F)
 
-    cpu->registers.F.N = 0;
-    cpu->registers.F.Z = cpu->context.P == 0x0    ? 1 : 0;
-    cpu->registers.F.H = cpu->context.P >  0x0FFF ? 1 : 0;
+    cpu->bus->writeMemoryU8(cpu->registers.HL, cpu->registers.Z);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(INCHLp_P3,)
@@ -1443,15 +1452,13 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0x35: DEC [HL]
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(DECHLp,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.HL);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.HL);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(DECHLp_P2,
-    cpu->context.P--;
+    SM83_DEC8(cpu->registers.Z, cpu->registers.F)
 
-    cpu->registers.F.N = 1;
-    cpu->registers.F.Z = cpu->context.P == 0x0    ? 1 : 0;
-    cpu->registers.F.H = cpu->context.P >  0x0FFF ? 1 : 0;
+    cpu->bus->writeMemoryU8(cpu->registers.HL, cpu->registers.Z);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(DECHLp_P3,)
@@ -1501,31 +1508,42 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0x38: JR C, e8
 SM83_INSTRUCTION_IMPLEMENTATION(JRC8,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.PC);
-    cpu->context.instruction_exit_early = cpu->registers.F.C == 0x00;
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.PC);
+    
+    // Expected check fails (so it's not zero)
+    if (!cpu->registers.F.C) {
+        cpu->context.skipSteps = 2;
+    }
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(JRC8_P2,
-    cpu->registers.PC += (s8) cpu->context.T;
+    cpu->registers.PC += (s8) cpu->registers.Z;
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION(JRC8_P3,)
+SM83_INSTRUCTION_IMPLEMENTATION(JRC8_P3,
+    cpu->context.instruction_exit_early = true;
+)
+
+SM83_INSTRUCTION_IMPLEMENTATION(JRC8_P4,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     JRC8,
     SM83_INSTRUCTION_DECLARATION(JRC8),
     SM83_INSTRUCTION_DECLARATION(JRC8_P2),
-    SM83_INSTRUCTION_DECLARATION(JRC8_P3)
+    SM83_INSTRUCTION_DECLARATION(JRC8_P3),
+    SM83_INSTRUCTION_DECLARATION(JRC8_P4)
 );
 
 // *****
 
 // 0x39: ADD HL, SP
-SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(ADDHLSP,
-    SM83_ADD_R16_R16(cpu->registers.HL, cpu->registers.SP, cpu->registers.F)
+SM83_INSTRUCTION_IMPLEMENTATION(ADDHLSP,
+     SM83_ADD_R8_R8(cpu->registers.L, cpu->registers.P, cpu->registers.F)
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION(ADDHLSP_P2,)
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(ADDHLSP_P2,
+    SM83_ADD_R8_R8_WITH_CARRY(cpu->registers.H, cpu->registers.S, cpu->registers.F)
+)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     ADDHLSP,
@@ -6973,7 +6991,7 @@ const SM83Opcode opcodesTable[] = {
     SM83_INSTRUCTION_INFO(0x2F, "CPL",          1, 1, 0, SM83_INSTRUCTION_STEPS_DECLARATION(CPL)),
 
     // 0x30
-    SM83_INSTRUCTION_INFO(0x30, "JR NC, e8",    2, 3, 0, SM83_INSTRUCTION_STEPS_DECLARATION(JRNC8)), // TODO: Could be 2 too
+    SM83_INSTRUCTION_INFO(0x30, "JR NC, e8",    2, 3, 2, SM83_INSTRUCTION_STEPS_DECLARATION(JRNC8)), // TODO: Could be 2 too
     SM83_INSTRUCTION_INFO(0x31, "LD SP, n16",   3, 3, 0, SM83_INSTRUCTION_STEPS_DECLARATION(LDSP16)),
     SM83_INSTRUCTION_INFO(0x32, "LD [HL-], A",  1, 2, 0, SM83_INSTRUCTION_STEPS_DECLARATION(LDHLmA)),
     SM83_INSTRUCTION_INFO(0x33, "INC SP",       1, 2, 0, SM83_INSTRUCTION_STEPS_DECLARATION(INCSP)),
@@ -6981,7 +6999,7 @@ const SM83Opcode opcodesTable[] = {
     SM83_INSTRUCTION_INFO(0x35, "DEC [HL]",     1, 3, 0, SM83_INSTRUCTION_STEPS_DECLARATION(DECHLp)),
     SM83_INSTRUCTION_INFO(0x36, "LD [HL], n8",  2, 3, 0, SM83_INSTRUCTION_STEPS_DECLARATION(LDHL8)),
     SM83_INSTRUCTION_INFO(0x37, "SCF",          1, 1, 0, SM83_INSTRUCTION_STEPS_DECLARATION(SCF)),
-    SM83_INSTRUCTION_INFO(0x38, "JR C, e8",     2, 3, 0, SM83_INSTRUCTION_STEPS_DECLARATION(JRC8)), // TODO: Could be 2 too
+    SM83_INSTRUCTION_INFO(0x38, "JR C, e8",     2, 3, 2, SM83_INSTRUCTION_STEPS_DECLARATION(JRC8)), // TODO: Could be 2 too
     SM83_INSTRUCTION_INFO(0x39, "ADD HL, SP",   1, 2, 0, SM83_INSTRUCTION_STEPS_DECLARATION(ADDHLSP)),
     SM83_INSTRUCTION_INFO(0x3A, "LD A, [HL-]",  1, 2, 0, SM83_INSTRUCTION_STEPS_DECLARATION(LDAHLpm)),
     SM83_INSTRUCTION_INFO(0x3B, "DEC SP",       1, 2, 0, SM83_INSTRUCTION_STEPS_DECLARATION(DECSP)),

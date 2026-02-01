@@ -106,13 +106,6 @@
     FLAGS.Z = (REGISTER & 0xFF) == 0x00; \
     FLAGS.N = 1;
 
-#define SM83_ADD_R16_R16(REGISTER1, REGISTER2, FLAGS) \
-    u32 result = REGISTER1 + REGISTER2; \
-    FLAGS.N = 0; \
-    FLAGS.H = (result > 0x0FFF) ? 1 : 0; \
-    FLAGS.C = (result > 0xFFFF) ? 1 : 0; \
-    REGISTER1 = result;
-
 #define SM83_ADD_R8_R8(REGISTER1, REGISTER2, FLAGS) \
     u16 result = REGISTER1 + REGISTER2; \
     FLAGS.N = 0; \
