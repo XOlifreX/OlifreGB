@@ -11,8 +11,9 @@ bool run_sm83_test(SM83TestCase test) {
 
     bool passed = true;
 
-    if (test.name.compare("20 22 11") == 0)
+    if (test.name.compare("27 07 3e") == 0) {
         int i = 0;
+    }
 
     // **************************
     // Init CPU state
@@ -108,7 +109,7 @@ void run_sm83_tests() {
     // Get list of JSON files
     // std::vector<std::string> files = getFileListOfDirectory(testPath.c_str());
     std::vector<std::string> files;
-    files.push_back("20.json");
+    // files.push_back("20.json");
     // files.push_back("21.json");
     // files.push_back("22.json");
     // files.push_back("23.json");
@@ -117,7 +118,7 @@ void run_sm83_tests() {
     // files.push_back("26.json");
     // files.push_back("27.json");
     // files.push_back("28.json");
-    // files.push_back("29.json");
+    files.push_back("29.json");
     // files.push_back("2A.json");
     // files.push_back("2B.json");
     // files.push_back("2C.json");

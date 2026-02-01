@@ -865,7 +865,8 @@ SM83_CB_INSTRUCTION_STEPS_IMPLEMENTATION(
 SM83_INSTRUCTION_IMPLEMENTATION(JRNZ8,
     cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.PC);
     
-    if (cpu->registers.F.Z == 0x01) {
+    // Expected check fails (so it's zero)
+    if (cpu->registers.F.Z) {
         cpu->context.skipSteps = 2;
     }
 )
@@ -985,51 +986,37 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 // *****
 
 // 0x27: DAA
+// DAA (Decimal Adjust Acumulator) will adjust the value of the A register to reflect a decimal number
+//     based in the previous operation.
+//     So => register A 0x7A with the N flag = 0 will become 0x81 because the previous operation was a plus which got into
+//           0xXA, so we need to add 0x06 to get back in the decimal value range. Same rule applies when substracting
+//     This also works for the MSBits, but an addition or substraction of 0x60 needs to happen
+// Better write-up at: https://blog.ollien.com/posts/gb-daa/
 SM83_INSTRUCTION_IMPLEMENTATION(DAA,
-    u8 msb = (cpu->registers.A & 0xF0) >> 0x4;
-    u8 lsb = cpu->registers.A & 0x0F;
+    u16 offset = 0;
+    bool should_carry = false;
 
-    // Purely for making the code shorter
     u8 N = cpu->registers.F.N;
     u8 C = cpu->registers.F.C;
     u8 H = cpu->registers.F.H;
 
-    if ((N == 0 && C == 0 && msb < 0x0A && H == 0 && msb < 0x0A) || 
-        (N == 1 && C == 0 && msb < 0x0A && H == 0 && msb < 0x0A)) {
-        cpu->registers.F.C = 0;
-        cpu->registers.A += 0x00;
-    }
-    else if ((N == 0 && C == 0 && msb < 0x09 && H == 0 && lsb >  0x09) ||
-             (N == 0 && C == 0 && msb < 0x0A && H == 1 && lsb <  0x04)) {
-        cpu->registers.F.C = 0;
-        cpu->registers.A += 0x06;
-    }
-    else if ((N == 0 && C == 0 && msb > 0x09 && H == 0 && lsb <  0x0A) ||
-             (N == 0 && C == 1 && msb < 0x03 && H == 0 && lsb <  0x0A)) {
-        cpu->registers.F.C = 1;
-        cpu->registers.A += 0x60;
-    }
-    else if ((N == 0 && C == 0 && msb > 0x08 && H == 0 && lsb >  0x09) ||
-             (N == 0 && C == 0 && msb > 0x09 && H == 1 && lsb <  0x04) ||
-             (N == 0 && C == 1 && msb < 0x03 && H == 0 && lsb >  0x09) ||
-             (N == 0 && C == 1 && msb < 0x04 && H == 1 && lsb <  0x04)) {
-        cpu->registers.F.C = 1;
-        cpu->registers.A += 0x66;
-    }
-    else if ( N == 1 && C == 0 && msb < 0x09 && H == 1 && lsb >  0x05) {
-        cpu->registers.F.C = 0;
-        cpu->registers.A += 0xFA;
-    }
-    else if ( N == 1 && C == 1 && msb > 0x06 && H == 0 && lsb <  0x0A) {
-        cpu->registers.F.C = 1;
-        cpu->registers.A += 0xA0;
-    }
-    else {
-        cpu->registers.F.C = 1;
-        cpu->registers.A += 0x9A;
+    if ((N == 0 && (cpu->registers.A & 0xF) > 0x09) || H == 1)
+        offset |= 0x06;
+        
+    if ((N == 0 && cpu->registers.A > 0x99) || C == 1) {
+        offset |= 0x60;
+        should_carry = true;
     }
 
-    cpu->registers.F.Z = cpu->registers.A == 0x0 ? 1 : 0; 
+    if (N == 0)
+        cpu->registers.A = (u8)(cpu->registers.A + offset);
+    else 
+        cpu->registers.A = (u8)(cpu->registers.A - offset);
+    
+    cpu->registers.F.Z = cpu->registers.A == 0;
+    cpu->registers.F.N = N;
+    cpu->registers.F.H = 0;
+    cpu->registers.F.C = should_carry;
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -1041,21 +1028,30 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0x28: JR Z, e8
 SM83_INSTRUCTION_IMPLEMENTATION(JRZ8,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.PC);
-    cpu->context.instruction_exit_early = cpu->registers.F.Z > 0x00;
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.PC);
+    
+    // Expected check fails (so it's not zero)
+    if (!cpu->registers.F.Z) {
+        cpu->context.skipSteps = 2;
+    }
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(JRZ8_P2,
-    cpu->registers.PC += (s8) cpu->context.T;
+    cpu->registers.PC += (s8) cpu->registers.Z;
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION(JRZ8_P3,)
+SM83_INSTRUCTION_IMPLEMENTATION(JRZ8_P3,
+    cpu->context.instruction_exit_early = true;
+)
+
+SM83_INSTRUCTION_IMPLEMENTATION(JRZ8_P4,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     JRZ8,
     SM83_INSTRUCTION_DECLARATION(JRZ8),
     SM83_INSTRUCTION_DECLARATION(JRZ8_P2),
-    SM83_INSTRUCTION_DECLARATION(JRZ8_P3)
+    SM83_INSTRUCTION_DECLARATION(JRZ8_P3),
+    SM83_INSTRUCTION_DECLARATION(JRZ8_P4)
 );
 
 // *****
@@ -6967,7 +6963,7 @@ const SM83Opcode opcodesTable[] = {
     SM83_INSTRUCTION_INFO(0x25, "DEC H",        1, 1, 0, SM83_INSTRUCTION_STEPS_DECLARATION(DECH)),
     SM83_INSTRUCTION_INFO(0x26, "LD H, n8",     2, 2, 0, SM83_INSTRUCTION_STEPS_DECLARATION(LDH8)),
     SM83_INSTRUCTION_INFO(0x27, "DAA",          1, 1, 0, SM83_INSTRUCTION_STEPS_DECLARATION(DAA)),
-    SM83_INSTRUCTION_INFO(0x28, "JR Z, e8",     2, 3, 0, SM83_INSTRUCTION_STEPS_DECLARATION(JRZ8)), // TODO: Could be 2 too
+    SM83_INSTRUCTION_INFO(0x28, "JR Z, e8",     2, 3, 2, SM83_INSTRUCTION_STEPS_DECLARATION(JRZ8)), // TODO: Could be 2 too
     SM83_INSTRUCTION_INFO(0x29, "ADD HL, HL",   1, 2, 0, SM83_INSTRUCTION_STEPS_DECLARATION(ADDHLHL)),
     SM83_INSTRUCTION_INFO(0x2A, "LD A, [HL+]",  1, 2, 0, SM83_INSTRUCTION_STEPS_DECLARATION(LDAHLpp)),
     SM83_INSTRUCTION_INFO(0x2B, "DEC HL",       1, 2, 0, SM83_INSTRUCTION_STEPS_DECLARATION(DECHL)),
