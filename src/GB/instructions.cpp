@@ -156,11 +156,11 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0x09: ADD HL, BC
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(ADDHLBC,
-     SM83_ADD_R8_R8(cpu->registers.L, cpu->registers.C, cpu->registers.F)
+     SM83_ADD_R8_R8_NO_ZERO(cpu->registers.L, cpu->registers.C, cpu->registers.F)
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(ADDHLBC_P2,
-    SM83_ADD_R8_R8_WITH_CARRY(cpu->registers.H, cpu->registers.B, cpu->registers.F)
+    SM83_ADD_R8_R8_WITH_CARRY_NO_ZERO(cpu->registers.H, cpu->registers.B, cpu->registers.F)
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -581,11 +581,11 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0x19: ADD HL, DE
 SM83_INSTRUCTION_IMPLEMENTATION(ADDHLDE,
-     SM83_ADD_R8_R8(cpu->registers.L, cpu->registers.E, cpu->registers.F)
+     SM83_ADD_R8_R8_NO_ZERO(cpu->registers.L, cpu->registers.E, cpu->registers.F)
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(ADDHLDE_P2,
-    SM83_ADD_R8_R8_WITH_CARRY(cpu->registers.H, cpu->registers.D, cpu->registers.F)
+    SM83_ADD_R8_R8_WITH_CARRY_NO_ZERO(cpu->registers.H, cpu->registers.D, cpu->registers.F)
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -1058,11 +1058,11 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0x29: ADD HL, HL
 SM83_INSTRUCTION_IMPLEMENTATION(ADDHLHL,
-     SM83_ADD_R8_R8(cpu->registers.L, cpu->registers.L, cpu->registers.F)
+     SM83_ADD_R8_R8_NO_ZERO(cpu->registers.L, cpu->registers.L, cpu->registers.F)
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(ADDHLHL_P2,
-    SM83_ADD_R8_R8_WITH_CARRY(cpu->registers.H, cpu->registers.H, cpu->registers.F)
+    SM83_ADD_R8_R8_WITH_CARRY_NO_ZERO(cpu->registers.H, cpu->registers.H, cpu->registers.F)
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -1538,11 +1538,11 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0x39: ADD HL, SP
 SM83_INSTRUCTION_IMPLEMENTATION(ADDHLSP,
-     SM83_ADD_R8_R8(cpu->registers.L, cpu->registers.P, cpu->registers.F)
+     SM83_ADD_R8_R8_NO_ZERO(cpu->registers.L, cpu->registers.P, cpu->registers.F)
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(ADDHLSP_P2,
-    SM83_ADD_R8_R8_WITH_CARRY(cpu->registers.H, cpu->registers.S, cpu->registers.F)
+    SM83_ADD_R8_R8_WITH_CARRY_NO_ZERO(cpu->registers.H, cpu->registers.S, cpu->registers.F)
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -3392,7 +3392,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0x85: ADDAL
 SM83_INSTRUCTION_IMPLEMENTATION(ADDAL,
-    SM83_ADD_R8_R8(cpu->registers.A, cpu->registers.B, cpu->registers.F)
+    SM83_ADD_R8_R8(cpu->registers.A, cpu->registers.L, cpu->registers.F)
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -3403,12 +3403,12 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 // *****
 
 // 0x86: ADDAHLp
-SM83_INSTRUCTION_IMPLEMENTATION(ADDAHLp,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.HL);
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(ADDAHLp,
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.HL);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(ADDAHLp_P2,
-    SM83_ADD_R8_R8(cpu->registers.A, cpu->context.P, cpu->registers.F)
+    SM83_ADD_R8_R8(cpu->registers.A, cpu->registers.Z, cpu->registers.F)
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -3504,7 +3504,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 // *****
 
 // 0x8E: ADCAHLp
-SM83_INSTRUCTION_IMPLEMENTATION(ADCAHLp,
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(ADCAHLp,
     cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.HL);
 )
 
@@ -3789,12 +3789,12 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 // *****
 
 // 0x96: SUBAHLp
-SM83_INSTRUCTION_IMPLEMENTATION(SUBAHLp,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.HL);
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(SUBAHLp,
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.HL);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(SUBAHLp_P2,
-    SM83_SUB_R8_R8(cpu->registers.A, cpu->context.P, cpu->registers.F)
+    SM83_SUB_R8_R8(cpu->registers.A, cpu->registers.Z, cpu->registers.F)
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -3890,12 +3890,12 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 // *****
 
 // 0x9E: SBCAHLp
-SM83_INSTRUCTION_IMPLEMENTATION(SBCAHLp,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.HL);
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(SBCAHLp,
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.HL);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(SBCAHLp_P2,
-    SM83_SUB_R8_R8_WITH_CARRY(cpu->registers.A, cpu->context.P, cpu->registers.F)
+    SM83_SUB_R8_R8_WITH_CARRY(cpu->registers.A, cpu->registers.Z, cpu->registers.F)
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(

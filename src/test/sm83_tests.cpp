@@ -11,7 +11,7 @@ bool run_sm83_test(SM83TestCase test) {
 
     bool passed = true;
 
-    if (test.name.compare("35 7a 33") == 0) {
+    if (test.name.compare("90 ca 32") == 0) {
         int i = 0;
     }
 
@@ -109,22 +109,23 @@ void run_sm83_tests() {
     // Get list of JSON files
     // std::vector<std::string> files = getFileListOfDirectory(testPath.c_str());
     std::vector<std::string> files;
-    files.push_back("80.json");
-    // files.push_back("81.json");
-    // files.push_back("82.json");
-    // files.push_back("83.json");
-    // files.push_back("84.json");
-    // files.push_back("85.json");
-    // files.push_back("86.json");
-    // files.push_back("87.json");
-    // files.push_back("88.json");
-    // files.push_back("89.json");
-    // files.push_back("8A.json");
-    // files.push_back("8B.json");
-    // files.push_back("8C.json");
-    // files.push_back("8D.json");
-    // files.push_back("8E.json");
-    // files.push_back("8F.json");
+
+    // files.push_back("90.json");
+    // files.push_back("91.json");
+    // files.push_back("92.json");
+    // files.push_back("93.json");
+    // files.push_back("94.json");
+    // files.push_back("95.json");
+    // files.push_back("96.json");
+    // files.push_back("97.json");
+    files.push_back("98.json");
+    // files.push_back("99.json");
+    // files.push_back("9A.json");
+    // files.push_back("9B.json");
+    // files.push_back("9C.json");
+    // files.push_back("9D.json");
+    // files.push_back("9E.json");
+    // files.push_back("9F.json");
 
     std::cout << "Found " << files.size() << " test files." << std::endl;
     for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it) {

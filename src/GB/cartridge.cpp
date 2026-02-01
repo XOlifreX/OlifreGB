@@ -265,7 +265,8 @@ Cartridge::Cartridge(const char* path) {
 }
 
 Cartridge::~Cartridge() {
-    delete this->data;
+    if (this->data != NULL)
+        delete this->data;
 }
 
 // I HATE THIS

@@ -52,7 +52,7 @@
 
 #define SM83_SLA(REGISTER, FLAGS) \
     u16 shifted = (REGISTER << 1) | (REGISTER & 0x80); \
-    FLAGS.Z = shifted == 0x00; \
+    FLAGS.Z = ((u8) shifted) == 0x00; \
     FLAGS.N = 0; \
     FLAGS.H = 0; \
     FLAGS.C = (shifted > 0xFF) ? 1 : 0; \
@@ -60,7 +60,7 @@
 
 #define SM83_SRA(REGISTER, FLAGS) \
     u16 shifted = (REGISTER >> 1) | (REGISTER & 0x80); \
-    FLAGS.Z = shifted == 0x00; \
+    FLAGS.Z = ((u8) shifted) == 0x00; \
     FLAGS.N = 0; \
     FLAGS.H = 0; \
     FLAGS.C = REGISTER & 0x01; \
@@ -68,7 +68,7 @@
 
 #define SM83_SWAP(REGISTER, FLAGS) \
     u8 result = (REGISTER >> 4) | (REGISTER << 4); \
-    FLAGS.Z = result == 0x00; \
+    FLAGS.Z = ((u8) result) == 0x00; \
     FLAGS.N = 0; \
     FLAGS.H = 0; \
     FLAGS.C = 0; \
@@ -76,7 +76,7 @@
 
 #define SM83_SRL(REGISTER, FLAGS) \
     u16 shifted = (REGISTER >> 1); \
-    FLAGS.Z = shifted == 0x00; \
+    FLAGS.Z = ((u8) shifted) == 0x00; \
     FLAGS.N = 0; \
     FLAGS.H = 0; \
     FLAGS.C = REGISTER & 0x01; \
@@ -106,39 +106,55 @@
     FLAGS.Z = (REGISTER & 0xFF) == 0x00; \
     FLAGS.N = 1;
 
-#define SM83_ADD_R8_R8(REGISTER1, REGISTER2, FLAGS) \
+#define SM83_ADD_R8_R8_NO_ZERO(REGISTER1, REGISTER2, FLAGS) \
     u16 result = REGISTER1 + REGISTER2; \
     FLAGS.N = 0; \
-    FLAGS.H = ((REGISTER1 & 0x0F) + (REGISTER2 & 0x0F)) > 0x0F ? 1 : 0; \
-    FLAGS.C = (result > 0xFF) ? 1 : 0; \
+    FLAGS.H = ((REGISTER1 & 0x0F) + (REGISTER2 & 0x0F)) > 0x0F; \
+    FLAGS.C = (result > 0xFF); \
+    REGISTER1 = result;
+
+#define SM83_ADD_R8_R8_WITH_CARRY_NO_ZERO(REGISTER1, REGISTER2, FLAGS) \
+    u16 result = REGISTER1 + REGISTER2 + FLAGS.C; \
+    FLAGS.N = 0; \
+    FLAGS.H = ((REGISTER1 & 0x0F) + (REGISTER2 & 0x0F) + FLAGS.C) > 0x0F; \
+    FLAGS.C = (result > 0xFF); \
+    REGISTER1 = result;
+
+#define SM83_ADD_R8_R8(REGISTER1, REGISTER2, FLAGS) \
+    u16 result = REGISTER1 + REGISTER2; \
+    FLAGS.Z = (result & 0x00FF) == 0x00; \
+    FLAGS.N = 0; \
+    FLAGS.H = ((REGISTER1 & 0x0F) + (REGISTER2 & 0x0F)) > 0x0F; \
+    FLAGS.C = (result > 0xFF); \
     REGISTER1 = result;
 
 #define SM83_ADD_R8_R8_WITH_CARRY(REGISTER1, REGISTER2, FLAGS) \
     u16 result = REGISTER1 + REGISTER2 + FLAGS.C; \
+    FLAGS.Z = (result & 0x00FF) == 0x00; \
     FLAGS.N = 0; \
-    FLAGS.H = ((REGISTER1 & 0x0F) + (REGISTER2 & 0x0F) + FLAGS.C) > 0x0F ? 1 : 0; \
-    FLAGS.C = (result > 0xFF) ? 1 : 0; \
+    FLAGS.H = ((REGISTER1 & 0x0F) + (REGISTER2 & 0x0F) + FLAGS.C) > 0x0F; \
+    FLAGS.C = (result > 0xFF); \
     REGISTER1 = result;
 
 #define SM83_SUB_R8_R8(REGISTER1, REGISTER2, FLAGS) \
     u16 result = REGISTER1 - REGISTER2; \
-    FLAGS.C = IS_CARRY_SET_SUB_U8(REGISTER1, REGISTER2); \
+    FLAGS.Z = (result & 0x00FF) == 0x00; \
     FLAGS.N = 1; \
-    FLAGS.H = (result > 0x0F) ? 1 : 0; \
-    FLAGS.Z = result == 0x0; \
+    FLAGS.H = (REGISTER1 & 0x0F) < (REGISTER2 & 0x0F); \
+    FLAGS.C = REGISTER1 < REGISTER2; \
     REGISTER1 = result;
 
 #define SM83_SUB_R8_R8_WITH_CARRY(REGISTER1, REGISTER2, FLAGS) \
     u16 result = REGISTER1 - REGISTER2 - FLAGS.C; \
-    FLAGS.C = IS_CARRY_SET_SUB_U8(REGISTER1, REGISTER2); \
+    FLAGS.Z = (result & 0x00FF) == 0x00; \
     FLAGS.N = 1; \
-    FLAGS.H = (result > 0x0F) ? 1 : 0; \
-    FLAGS.Z = result == 0x0; \
+    FLAGS.H = (REGISTER1 & 0x0F) < ((REGISTER2 - FLAGS.C) & 0x0F); \
+    FLAGS.C = REGISTER1 < (REGISTER2 - FLAGS.C); \
     REGISTER1 = result;
 
 #define SM83_AND_R8_R8(REGISTER1, REGISTER2, FLAGS) \
     u16 result = REGISTER1 & REGISTER2; \
-    FLAGS.Z = result == 0x0; \
+    FLAGS.Z = ((u8) result) == 0x0; \
     FLAGS.N = 0; \
     FLAGS.H = 1; \
     FLAGS.C = 0; \
@@ -146,7 +162,7 @@
 
 #define SM83_XOR_R8_R8(REGISTER1, REGISTER2, FLAGS) \
     u16 result = REGISTER1 ^ REGISTER2; \
-    FLAGS.Z = result == 0x0; \
+    FLAGS.Z = ((u8) result) == 0x0; \
     FLAGS.N = 0; \
     FLAGS.H = 0; \
     FLAGS.C = 0; \
@@ -154,7 +170,7 @@
 
 #define SM83_OR_R8_R8(REGISTER1, REGISTER2, FLAGS) \
     u16 result = REGISTER1 | REGISTER2; \
-    FLAGS.Z = result == 0x0; \
+    FLAGS.Z = ((u8) result) == 0x0; \
     FLAGS.N = 0; \
     FLAGS.H = 1; \
     FLAGS.C = 0; \
@@ -165,14 +181,14 @@
     FLAGS.C = IS_CARRY_SET_SUB_U8(REGISTER1, REGISTER2); \
     FLAGS.N = 1; \
     FLAGS.H = (result > 0x0F) ? 1 : 0; \
-    FLAGS.Z = result == 0x0;
+    FLAGS.Z = ((u8) result) == 0x0;
 
 #define SM83_ADD_R8_IMM8(REGISTER, VALUE, FLAGS) \
     u16 result = REGISTER + VALUE; \
     FLAGS.C = IS_CARRY_SET_ADD_U8(REGISTER, VALUE); \
     FLAGS.N = 0; \
     FLAGS.H = (result > 0x0F) ? 1 : 0; \
-    FLAGS.Z = result == 0x0; \
+    FLAGS.Z = ((u8) result) == 0x0; \
     REGISTER = result;
 
 #define SM83_ADD_R16_IMM8_SIGNED(REGISTER, VALUE, FLAGS) \
@@ -188,7 +204,7 @@
     FLAGS.C = IS_CARRY_SET_ADD_U8(REGISTER, VALUE); \
     FLAGS.N = 0; \
     FLAGS.H = (result > 0x0F) ? 1 : 0; \
-    FLAGS.Z = result == 0x0; \
+    FLAGS.Z = ((u8) result) == 0x0; \
     REGISTER = result;
 
 #define SM83_SUB_R8_IMM8(REGISTER, VALUE, FLAGS) \
@@ -196,7 +212,7 @@
     FLAGS.C = IS_CARRY_SET_SUB_U8(REGISTER, VALUE); \
     FLAGS.N = 1; \
     FLAGS.H = (result > 0x0F) ? 1 : 0; \
-    FLAGS.Z = result == 0x0; \
+    FLAGS.Z = ((u8) result) == 0x0; \
     REGISTER = result;
 
 #define SM83_SUB_R8_IMM8_WITH_CARRY(REGISTER, VALUE, FLAGS) \
@@ -204,7 +220,7 @@
     FLAGS.C = IS_CARRY_SET_SUB_U8(REGISTER, VALUE); \
     FLAGS.N = 1; \
     FLAGS.H = (result > 0x0F) ? 1 : 0; \
-    FLAGS.Z = result == 0x0; \
+    FLAGS.Z = ((u8) result) == 0x0; \
     REGISTER = result;
 
 #define SM83_AND_R8_IMM8(REGISTER, VALUE, FLAGS) \
@@ -236,7 +252,7 @@
     FLAGS.C = IS_CARRY_SET_SUB_U8(REGISTER, VALUE); \
     FLAGS.N = 1; \
     FLAGS.H = (result > 0x0F) ? 1 : 0; \
-    FLAGS.Z = result == 0x0;
+    FLAGS.Z = ((u8) result) == 0x0;
 
 // ********************
 
