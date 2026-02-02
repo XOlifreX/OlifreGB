@@ -11,7 +11,7 @@ bool run_sm83_test(SM83TestCase test) {
 
     bool passed = true;
 
-    if (test.name.compare("98 c1 54") == 0) {
+    if (test.name.compare("c2 46 c6") == 0) {
         int i = 0;
     }
 
@@ -56,7 +56,6 @@ bool run_sm83_test(SM83TestCase test) {
 
     // **************************
     // Check CPU final state
-
     passed &= cpu->registers.A == test.final.a;
     passed &= cpu->registers.B == test.final.b;
     passed &= cpu->registers.C == test.final.c;
@@ -107,25 +106,28 @@ void run_sm83_tests() {
     std::string testPath = "test";
     
     // Get list of JSON files
-    std::vector<std::string> files = getFileListOfDirectory(testPath.c_str());
-    // std::vector<std::string> files;
+    // std::vector<std::string> files = getFileListOfDirectory(testPath.c_str());
+    std::vector<std::string> files;
+    
+    // FINAL BOSS
+    // files.push_back("CB.json");
 
-    // files.push_back("B0.json");
-    // files.push_back("B1.json");
-    // files.push_back("B2.json");
-    // files.push_back("B3.json");
-    // files.push_back("B4.json");
-    // files.push_back("B5.json");
-    // files.push_back("B6.json");
-    // files.push_back("B7.json");
-    // files.push_back("B8.json");
-    // files.push_back("B9.json");
-    // files.push_back("BA.json");
-    // files.push_back("BB.json");
-    // files.push_back("BC.json");
-    // files.push_back("BD.json");
-    // files.push_back("BE.json");
-    // files.push_back("BF.json");
+    files.push_back("D0.json");
+    // files.push_back("D1.json");
+    // files.push_back("D2.json");
+    // files.push_back("D3.json");
+    // files.push_back("D4.json");
+    // files.push_back("D5.json");
+    // files.push_back("D6.json");
+    // files.push_back("D7.json");
+    // files.push_back("D8.json");
+    // files.push_back("D9.json");
+    // files.push_back("DA.json");
+    // files.push_back("DB.json");
+    // files.push_back("DC.json");
+    // files.push_back("DD.json");
+    // files.push_back("DE.json");
+    // files.push_back("DF.json");
 
     std::cout << "Found " << files.size() << " test files." << std::endl;
     for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it) {

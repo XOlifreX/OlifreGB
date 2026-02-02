@@ -185,10 +185,10 @@
 
 #define SM83_ADD_R8_IMM8(REGISTER, VALUE, FLAGS) \
     u16 result = REGISTER + VALUE; \
-    FLAGS.Z = ((u8) result) == 0x0; \
+    FLAGS.Z = (result & 0x00FF) == 0x00; \
     FLAGS.N = 0; \
-    FLAGS.H = (result > 0x0F) ? 1 : 0; \
-    FLAGS.C = IS_CARRY_SET_ADD_U8(REGISTER, VALUE); \
+    FLAGS.H = ((REGISTER & 0x0F) + (VALUE & 0x0F)) > 0x0F; \
+    FLAGS.C = (result > 0xFF); \
     REGISTER = result;
 
 #define SM83_ADD_R16_IMM8_SIGNED(REGISTER, VALUE, FLAGS) \
@@ -201,10 +201,10 @@
 
 #define SM83_ADD_R8_IMM8_WITH_CARRY(REGISTER, VALUE, FLAGS) \
     u16 result = REGISTER + VALUE + FLAGS.C; \
-    FLAGS.C = IS_CARRY_SET_ADD_U8(REGISTER, VALUE); \
+    FLAGS.Z = (result & 0x00FF) == 0x00; \
     FLAGS.N = 0; \
-    FLAGS.H = (result > 0x0F) ? 1 : 0; \
-    FLAGS.Z = ((u8) result) == 0x0; \
+    FLAGS.H = ((REGISTER & 0x0F) + (VALUE & 0x0F) + FLAGS.C) > 0x0F; \
+    FLAGS.C = (result > 0xFF); \
     REGISTER = result;
 
 #define SM83_SUB_R8_IMM8(REGISTER, VALUE, FLAGS) \

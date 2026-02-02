@@ -867,7 +867,7 @@ SM83_INSTRUCTION_IMPLEMENTATION(JRNZ8,
     
     // Expected check fails (so it's zero)
     if (cpu->registers.F.Z) {
-        cpu->context.skipSteps = 2;
+        cpu->context.skipSteps = cpu->context.currentInstruction->earlyExitSkipSteps;
     }
 )
 
@@ -1032,7 +1032,7 @@ SM83_INSTRUCTION_IMPLEMENTATION(JRZ8,
     
     // Expected check fails (so it's not zero)
     if (!cpu->registers.F.Z) {
-        cpu->context.skipSteps = 2;
+        cpu->context.skipSteps = cpu->context.currentInstruction->earlyExitSkipSteps;
     }
 )
 
@@ -1349,7 +1349,7 @@ SM83_INSTRUCTION_IMPLEMENTATION(JRNC8,
     
     // Expected check fails (so it's not zero)
     if (cpu->registers.F.C) {
-        cpu->context.skipSteps = 2;
+        cpu->context.skipSteps = cpu->context.currentInstruction->earlyExitSkipSteps;
     }
 )
 
@@ -1512,7 +1512,7 @@ SM83_INSTRUCTION_IMPLEMENTATION(JRC8,
     
     // Expected check fails (so it's not zero)
     if (!cpu->registers.F.C) {
-        cpu->context.skipSteps = 2;
+        cpu->context.skipSteps = cpu->context.currentInstruction->earlyExitSkipSteps;
     }
 )
 
@@ -4876,24 +4876,29 @@ SM83_CB_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xC0: RET NZ
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETNZ,
-    cpu->context.instruction_exit_early = cpu->registers.F.Z == 0x00;
+    if (cpu->registers.F.Z != 0x00)
+        cpu->context.skipSteps = cpu->context.currentInstruction->earlyExitSkipSteps;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETNZ_P2,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETNZ_P3,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETNZ_P4,
-    cpu->registers.PC = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
+    cpu->registers.PC = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION(RETNZ_P5,)
+SM83_INSTRUCTION_IMPLEMENTATION(RETNZ_P5,
+    cpu->context.instruction_exit_early = true;
+)
+
+SM83_INSTRUCTION_IMPLEMENTATION(RETNZ_P6,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     RETNZ,
@@ -4901,50 +4906,50 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     SM83_INSTRUCTION_DECLARATION(RETNZ_P2),
     SM83_INSTRUCTION_DECLARATION(RETNZ_P3),
     SM83_INSTRUCTION_DECLARATION(RETNZ_P4),
-    SM83_INSTRUCTION_DECLARATION(RETNZ_P5)
+    SM83_INSTRUCTION_DECLARATION(RETNZ_P5),
+    SM83_INSTRUCTION_DECLARATION(RETNZ_P6)
 );
 
 // 0xC1: POP BC
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(POPBC,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(POPBC_P2,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(POPBC_P3,
-    cpu->registers.BC = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
+SM83_INSTRUCTION_IMPLEMENTATION(POPBC_P3,
+    cpu->registers.BC = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
-
-SM83_INSTRUCTION_IMPLEMENTATION(POPBC_P4,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     POPBC,
     SM83_INSTRUCTION_DECLARATION(POPBC),
     SM83_INSTRUCTION_DECLARATION(POPBC_P2),
-    SM83_INSTRUCTION_DECLARATION(POPBC_P3),
-    SM83_INSTRUCTION_DECLARATION(POPBC_P4)
+    SM83_INSTRUCTION_DECLARATION(POPBC_P3)
 );
 
 // 0xC2: JR NZ, a16
 SM83_INSTRUCTION_IMPLEMENTATION(JRNZ16,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(JRNZ16_P2,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.PC);
+    
+    if (cpu->registers.F.Z != 0x00)
+        cpu->context.skipSteps = cpu->context.currentInstruction->earlyExitSkipSteps;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(JRNZ16_P3,
-    cpu->context.TP = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
-    cpu->context.instruction_exit_early = cpu->registers.F.Z == 0x00;
+    cpu->registers.PC = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(JRNZ16_P4,
-    cpu->registers.PC = cpu->context.TP;
+SM83_INSTRUCTION_IMPLEMENTATION(JRNZ16_P4,
+    cpu->context.instruction_exit_early = true;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(JRNZ16_P5,)
@@ -4960,15 +4965,15 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xC3: JP a16
 SM83_INSTRUCTION_IMPLEMENTATION(JP16,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(JP16_P2,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(JP16_P3,
-    cpu->registers.PC = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
+    cpu->registers.PC = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(JP16_P4,)
@@ -4983,18 +4988,17 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xC4: CALL NZ, a16
 SM83_INSTRUCTION_IMPLEMENTATION(CALLNZ16,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(CALLNZ16_P2,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.PC);
+    
+    if (cpu->registers.F.Z != 0x00)
+        cpu->context.skipSteps = cpu->context.currentInstruction->earlyExitSkipSteps;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(CALLNZ16_P3,
-    cpu->context.TP = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
-    cpu->context.instruction_exit_early = cpu->registers.F.Z == 0x00;
-    
-    if (!cpu->context.instruction_exit_early)
     cpu->registers.SP--;
 )
 
@@ -5005,10 +5009,14 @@ SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(CALLNZ16_P4,
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(CALLNZ16_P5,
     cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC & 0x00FF);
-    cpu->registers.PC = cpu->context.TP;
+    cpu->registers.PC = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION(CALLNZ16_P6,)
+SM83_INSTRUCTION_IMPLEMENTATION(CALLNZ16_P6,
+    cpu->context.instruction_exit_early = true;
+)
+
+SM83_INSTRUCTION_IMPLEMENTATION(CALLNZ16_P7,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     CALLNZ16,
@@ -5018,6 +5026,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     SM83_INSTRUCTION_DECLARATION(CALLNZ16_P4),
     SM83_INSTRUCTION_DECLARATION(CALLNZ16_P5),
     SM83_INSTRUCTION_DECLARATION(CALLNZ16_P6),
+    SM83_INSTRUCTION_DECLARATION(CALLNZ16_P7)
 );
 
 // 0xC5: PUSH BC
@@ -5060,7 +5069,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 );
 
 // 0xC7: RST $00
-SM83_INSTRUCTION_IMPLEMENTATION(RST00,
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST00,
     cpu->registers.SP--;
 )
 
@@ -5071,11 +5080,10 @@ SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST00_P2,
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST00_P3,
     cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC & 0x00FF);
+    cpu->registers.PC = 0x0000;
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST00_P4,
-    cpu->registers.PC = ((0x0 << 0x8) & 0xFF00) | (0x00 & 0x00FF);
-)
+SM83_INSTRUCTION_IMPLEMENTATION(RST00_P4,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     RST00,
@@ -5087,24 +5095,29 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xC8: RET Z
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETZ,
-    cpu->context.instruction_exit_early = cpu->registers.F.Z != 0x00;
+    if (cpu->registers.F.Z == 0x00)
+        cpu->context.skipSteps = cpu->context.currentInstruction->earlyExitSkipSteps;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETZ_P2,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETZ_P3,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETZ_P4,
-    cpu->registers.PC = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
+    cpu->registers.PC = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION(RETZ_P5,)
+SM83_INSTRUCTION_IMPLEMENTATION(RETZ_P5,
+    cpu->context.instruction_exit_early = true;
+)
+
+SM83_INSTRUCTION_IMPLEMENTATION(RETZ_P6,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     RETZ,
@@ -5112,22 +5125,23 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     SM83_INSTRUCTION_DECLARATION(RETZ_P2),
     SM83_INSTRUCTION_DECLARATION(RETZ_P3),
     SM83_INSTRUCTION_DECLARATION(RETZ_P4),
-    SM83_INSTRUCTION_DECLARATION(RETZ_P5)
+    SM83_INSTRUCTION_DECLARATION(RETZ_P5),
+    SM83_INSTRUCTION_DECLARATION(RETZ_P6)
 );
 
 // 0xC9: RET
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RET,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RET_P2,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RET_P3,
-    cpu->registers.PC = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
+    cpu->registers.PC = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(RET_P4,)
@@ -5142,28 +5156,34 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xCA: JP Z, a16
 SM83_INSTRUCTION_IMPLEMENTATION(JPZ16,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(JPZ16_P2,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.PC);
+    
+    if (cpu->registers.F.Z == 0x00)
+        cpu->context.skipSteps = cpu->context.currentInstruction->earlyExitSkipSteps;
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION(JPZ16_P3,
-    cpu->context.TP = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
-    cpu->context.instruction_exit_early = cpu->context.TP == 0x00;
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(JPZ16_P3,
+    cpu->registers.PC = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(JPZ16_P4,
-    cpu->registers.PC = cpu->context.TP;
+SM83_INSTRUCTION_IMPLEMENTATION(JPZ16_P4,
+    cpu->context.instruction_exit_early = true;
 )
+
+SM83_INSTRUCTION_IMPLEMENTATION(JPZ16_P5,)
+
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     JPZ16,
     SM83_INSTRUCTION_DECLARATION(JPZ16),
     SM83_INSTRUCTION_DECLARATION(JPZ16_P2),
     SM83_INSTRUCTION_DECLARATION(JPZ16_P3),
-    SM83_INSTRUCTION_DECLARATION(JPZ16_P4)
+    SM83_INSTRUCTION_DECLARATION(JPZ16_P4),
+    SM83_INSTRUCTION_DECLARATION(JPZ16_P5)
 );
 
 // 0xCB: PREFIX
@@ -5178,18 +5198,17 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xCC: CALL Z, a16
 SM83_INSTRUCTION_IMPLEMENTATION(CALLZ16,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(CALLZ16_P2,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.PC);
+    
+    if (cpu->registers.F.Z == 0x00)
+        cpu->context.skipSteps = cpu->context.currentInstruction->earlyExitSkipSteps;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(CALLZ16_P3,
-    cpu->context.TP = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
-    cpu->context.instruction_exit_early = cpu->registers.F.Z != 0x00;
-    
-    if (!cpu->context.instruction_exit_early)
     cpu->registers.SP--;
 )
 
@@ -5200,10 +5219,14 @@ SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(CALLZ16_P4,
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(CALLZ16_P5,
     cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC & 0x00FF);
-    cpu->registers.PC = cpu->context.TP;
+    cpu->registers.PC = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION(CALLZ16_P6,)
+SM83_INSTRUCTION_IMPLEMENTATION(CALLZ16_P6,
+    cpu->context.instruction_exit_early = true;
+)
+
+SM83_INSTRUCTION_IMPLEMENTATION(CALLZ16_P7,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     CALLZ16,
@@ -5213,19 +5236,19 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     SM83_INSTRUCTION_DECLARATION(CALLZ16_P4),
     SM83_INSTRUCTION_DECLARATION(CALLZ16_P5),
     SM83_INSTRUCTION_DECLARATION(CALLZ16_P6),
+    SM83_INSTRUCTION_DECLARATION(CALLZ16_P7)
 );
 
 // 0xCD: CALL a16
 SM83_INSTRUCTION_IMPLEMENTATION(CALL16,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(CALL16_P2,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(CALL16_P3,
-    cpu->context.TP = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
     cpu->registers.SP--;
 )
 
@@ -5236,7 +5259,7 @@ SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(CALL16_P4,
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(CALL16_P5,
     cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC & 0x00FF);
-    cpu->registers.PC = cpu->context.TP;
+    cpu->registers.PC = cpu->registers.WZ;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(CALL16_P6,)
@@ -5253,11 +5276,11 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xCE: ADC A, n8
 SM83_INSTRUCTION_IMPLEMENTATION(ADCA8,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(ADCA8_P2,
-    SM83_ADD_R8_IMM8_WITH_CARRY(cpu->registers.A, cpu->context.T, cpu->registers.F)
+    SM83_ADD_R8_IMM8_WITH_CARRY(cpu->registers.A, cpu->registers.Z, cpu->registers.F)
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -5267,7 +5290,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 );
 
 // 0xCF: RST $08
-SM83_INSTRUCTION_IMPLEMENTATION(RST08,
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST08,
     cpu->registers.SP--;
 )
 
@@ -5278,11 +5301,10 @@ SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST08_P2,
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST08_P3,
     cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC & 0x00FF);
+    cpu->registers.PC = 0x0008;
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST08_P4,
-    cpu->registers.PC = ((0x0 << 0x8) & 0xFF00) | (0x08 & 0x00FF);
-)
+SM83_INSTRUCTION_IMPLEMENTATION(RST08_P4,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     RST08,
@@ -5482,24 +5504,29 @@ SM83_CB_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xD0: RET NC
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETNC,
-    cpu->context.instruction_exit_early = cpu->registers.F.C == 0x00;
+    if (cpu->registers.C != 0x00)
+        cpu->context.skipSteps = cpu->context.currentInstruction->earlyExitSkipSteps;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETNC_P2,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETNC_P3,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETNC_P4,
-    cpu->registers.PC = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
+    cpu->registers.PC = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION(RETNC_P5,)
+SM83_INSTRUCTION_IMPLEMENTATION(RETNC_P5,
+    cpu->context.instruction_exit_early = true;
+)
+
+SM83_INSTRUCTION_IMPLEMENTATION(RETNC_P6,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     RETNC,
@@ -5512,17 +5539,17 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xD1: POP DE
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(POPDE,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(POPDE_P2,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(POPDE_P3,
-    cpu->registers.DE = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
+    cpu->registers.DE = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(POPDE_P4,)
@@ -5537,20 +5564,22 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xD2: JR NC, a16
 SM83_INSTRUCTION_IMPLEMENTATION(JRNC16,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(JRNC16_P2,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.PC);
+    
+    if (cpu->registers.C != 0x00)
+        cpu->context.skipSteps = cpu->context.currentInstruction->earlyExitSkipSteps;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(JRNC16_P3,
-    cpu->context.TP = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
-    cpu->context.instruction_exit_early = cpu->registers.F.C == 0x00;
+    cpu->registers.PC = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(JRNC16_P4,
-    cpu->registers.PC = cpu->context.TP;
+SM83_INSTRUCTION_IMPLEMENTATION(JRNC16_P4,
+    cpu->context.instruction_exit_early = true;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(JRNC16_P5,)
@@ -5574,19 +5603,18 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xD4: CALL NC, a16
 SM83_INSTRUCTION_IMPLEMENTATION(CALLNC16,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.PC);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(CALLNC16_P2,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.PC);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.PC);
+    
+    if (cpu->registers.F.Z != 0x00)
+        cpu->context.skipSteps = cpu->context.currentInstruction->earlyExitSkipSteps;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(CALLNC16_P3,
-    cpu->context.TP = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
-    cpu->context.instruction_exit_early = cpu->registers.F.C == 0x00;
-    
-    if (!cpu->context.instruction_exit_early)
-        cpu->registers.SP--;
+    cpu->registers.SP--;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(CALLNC16_P4,
@@ -5596,10 +5624,14 @@ SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(CALLNC16_P4,
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(CALLNC16_P5,
     cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC & 0x00FF);
-    cpu->registers.PC = cpu->context.TP;
+    cpu->registers.PC = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION(CALLNC16_P6,)
+SM83_INSTRUCTION_IMPLEMENTATION(CALLNC16_P6,
+    cpu->context.instruction_exit_early = true;
+)
+
+SM83_INSTRUCTION_IMPLEMENTATION(CALLNC16_P7,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     CALLNC16,
@@ -5609,6 +5641,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     SM83_INSTRUCTION_DECLARATION(CALLNC16_P4),
     SM83_INSTRUCTION_DECLARATION(CALLNC16_P5),
     SM83_INSTRUCTION_DECLARATION(CALLNC16_P6),
+    SM83_INSTRUCTION_DECLARATION(CALLNC16_P7),
 );
 
 // 0xD5: PUSH DE
@@ -5651,7 +5684,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 );
 
 // 0xD7: RST $10
-SM83_INSTRUCTION_IMPLEMENTATION(RST10,
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST10,
     cpu->registers.SP--;
 )
 
@@ -5662,11 +5695,10 @@ SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST10_P2,
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST10_P3,
     cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC & 0x00FF);
+    cpu->registers.PC = 0x0010;
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST10_P4,
-    cpu->registers.PC = ((0x0 << 0x8) & 0xFF00) | (0x10 & 0x00FF);
-)
+SM83_INSTRUCTION_IMPLEMENTATION(RST10_P4,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     RST10,
@@ -5678,24 +5710,29 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xD8: RET C
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETC,
-    cpu->context.instruction_exit_early = cpu->registers.F.C == 0x00;
+    if (cpu->registers.C == 0x00)
+        cpu->context.skipSteps = cpu->context.currentInstruction->earlyExitSkipSteps;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETC_P2,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETC_P3,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETC_P4,
-    cpu->registers.PC = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
+    cpu->registers.PC = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION(RETC_P5,)
+SM83_INSTRUCTION_IMPLEMENTATION(RETC_P5,
+    cpu->context.instruction_exit_early = true;
+)
+
+SM83_INSTRUCTION_IMPLEMENTATION(RETC_P6,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     RETC,
@@ -5709,17 +5746,17 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 // 0xD9: RETI (Return from interupt handler)
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETI,
     cpu->IME = true;
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETI_P2,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETI_P3,
-    cpu->registers.PC = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
+    cpu->registers.PC = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(RETI_P4,)
@@ -5829,7 +5866,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 );
 
 // 0xDF: RST $18
-SM83_INSTRUCTION_IMPLEMENTATION(RST18,
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST18,
     cpu->registers.SP--;
 )
 
@@ -5840,11 +5877,10 @@ SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST18_P2,
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST18_P3,
     cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC & 0x00FF);
+    cpu->registers.PC = 0x0018;
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST18_P4,
-    cpu->registers.PC = ((0x0 << 0x8) & 0xFF00) | (0x18 & 0x00FF);
-)
+SM83_INSTRUCTION_IMPLEMENTATION(RST18_P4,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     RST18,
@@ -6060,17 +6096,17 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xE1: POP HL
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(POPHL,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(POPHL_P2,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(POPHL_P3,
-    cpu->registers.HL = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
+    cpu->registers.HL = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(POPHL_P4,)
@@ -6152,7 +6188,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 );
 
 // 0xE7: RST $20
-SM83_INSTRUCTION_IMPLEMENTATION(RST20,
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST20,
     cpu->registers.SP--;
 )
 
@@ -6163,11 +6199,10 @@ SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST20_P2,
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST20_P3,
     cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC & 0x00FF);
+    cpu->registers.PC = 0x0020;
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST20_P4,
-    cpu->registers.PC = ((0x0 << 0x8) & 0xFF00) | (0x20 & 0x00FF);
-)
+SM83_INSTRUCTION_IMPLEMENTATION(RST20_P4,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     RST20,
@@ -6265,7 +6300,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 );
 
 // 0xEF: RST $28
-SM83_INSTRUCTION_IMPLEMENTATION(RST28,
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST28,
     cpu->registers.SP--;
 )
 
@@ -6276,11 +6311,10 @@ SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST28_P2,
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST28_P3,
     cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC & 0x00FF);
+    cpu->registers.PC = 0x0028;
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST28_P4,
-    cpu->registers.PC = ((0x0 << 0x8) & 0xFF00) | (0x28 & 0x00FF);
-)
+SM83_INSTRUCTION_IMPLEMENTATION(RST28_P4,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     RST28,
@@ -6496,17 +6530,17 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xF1: POP AF
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(POPAF,
-    cpu->context.P = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(POPAF_P2,
-    cpu->context.T = cpu->bus->readMemoryU8(cpu->registers.SP);
+    cpu->registers.W = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(POPAF_P3,
-    cpu->registers.FA = ((cpu->context.T << 0x8) & 0xFF00) | (cpu->context.P & 0x00FF);
+    cpu->registers.FA = ((cpu->registers.W << 0x8) & 0xFF00) | (cpu->registers.Z & 0x00FF);
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(POPAF_P4,)
@@ -6590,7 +6624,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 );
 
 // 0xF7: RST $30
-SM83_INSTRUCTION_IMPLEMENTATION(RST30,
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST30,
     cpu->registers.SP--;
 )
 
@@ -6601,11 +6635,10 @@ SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST30_P2,
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST30_P3,
     cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC & 0x00FF);
+    cpu->registers.PC = 0x0030;
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST30_P4,
-    cpu->registers.PC = ((0x0 << 0x8) & 0xFF00) | (0x30 & 0x00FF);
-)
+SM83_INSTRUCTION_IMPLEMENTATION(RST30_P4,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     RST30,
@@ -6712,7 +6745,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 );
 
 // 0xFF: RST $38
-SM83_INSTRUCTION_IMPLEMENTATION(RST38,
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST38,
     cpu->registers.SP--;
 )
 
@@ -6723,11 +6756,10 @@ SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST38_P2,
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST38_P3,
     cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC & 0x00FF);
+    cpu->registers.PC = 0x0038;
 )
 
-SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RST38_P4,
-    cpu->registers.PC = ((0x0 << 0x8) & 0xFF00) | (0x38 & 0x00FF);
-)
+SM83_INSTRUCTION_IMPLEMENTATION(RST38_P4,)
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     RST38,
@@ -7153,35 +7185,35 @@ const SM83Opcode opcodesTable[] = {
     SM83_INSTRUCTION_INFO(0xBF, "CP A, A",       1, 1, 0, SM83_INSTRUCTION_STEPS_DECLARATION(CPAA)),
 
     // 0xC0
-    SM83_INSTRUCTION_INFO(0xC0, "RET NZ",        1, 5, 0, SM83_INSTRUCTION_STEPS_DECLARATION(RETNZ)), // TODO: Could be 2 too 
+    SM83_INSTRUCTION_INFO(0xC0, "RET NZ",        1, 5, 4, SM83_INSTRUCTION_STEPS_DECLARATION(RETNZ)), // TODO: Could be 2 too 
     SM83_INSTRUCTION_INFO(0xC1, "POP BC",        1, 3, 0, SM83_INSTRUCTION_STEPS_DECLARATION(POPBC)),
-    SM83_INSTRUCTION_INFO(0xC2, "JR NZ, a16",    1, 4, 0, SM83_INSTRUCTION_STEPS_DECLARATION(JRNZ16)), // TODO: Could be 3 too 
+    SM83_INSTRUCTION_INFO(0xC2, "JR NZ, a16",    1, 4, 2, SM83_INSTRUCTION_STEPS_DECLARATION(JRNZ16)), // TODO: Could be 3 too 
     SM83_INSTRUCTION_INFO(0xC3, "JP a16",        3, 4, 0, SM83_INSTRUCTION_STEPS_DECLARATION(JP16)),
-    SM83_INSTRUCTION_INFO(0xC4, "CALL NZ, a16",  3, 6, 0, SM83_INSTRUCTION_STEPS_DECLARATION(CALLNZ16)), // TODO: Could be 3 too 
+    SM83_INSTRUCTION_INFO(0xC4, "CALL NZ, a16",  3, 6, 4, SM83_INSTRUCTION_STEPS_DECLARATION(CALLNZ16)), // TODO: Could be 3 too 
     SM83_INSTRUCTION_INFO(0xC5, "PUSH BC",       1, 4, 0, SM83_INSTRUCTION_STEPS_DECLARATION(PUSHBC)),
     SM83_INSTRUCTION_INFO(0xC6, "ADD A, n8",     2, 2, 0, SM83_INSTRUCTION_STEPS_DECLARATION(ADDA8)),
     SM83_INSTRUCTION_INFO(0xC7, "RST $00",       1, 4, 0, SM83_INSTRUCTION_STEPS_DECLARATION(RST00)),
-    SM83_INSTRUCTION_INFO(0xC8, "RET Z",         1, 5, 0, SM83_INSTRUCTION_STEPS_DECLARATION(RETZ)), // TODO: Could be 2 too 
+    SM83_INSTRUCTION_INFO(0xC8, "RET Z",         1, 5, 4, SM83_INSTRUCTION_STEPS_DECLARATION(RETZ)), // TODO: Could be 2 too 
     SM83_INSTRUCTION_INFO(0xC9, "RET",           1, 4, 0, SM83_INSTRUCTION_STEPS_DECLARATION(RET)),
-    SM83_INSTRUCTION_INFO(0xCA, "JP Z, a16",     3, 4, 0, SM83_INSTRUCTION_STEPS_DECLARATION(JPZ16)), // TODO: Could be 3 too 
+    SM83_INSTRUCTION_INFO(0xCA, "JP Z, a16",     3, 4, 2, SM83_INSTRUCTION_STEPS_DECLARATION(JPZ16)), // TODO: Could be 3 too 
     SM83_INSTRUCTION_INFO(0xCB, "PREFIX",        1, 1, 0, SM83_INSTRUCTION_STEPS_DECLARATION(PREFIX)),
-    SM83_INSTRUCTION_INFO(0xCC, "CALL Z, a16",   3, 6, 0, SM83_INSTRUCTION_STEPS_DECLARATION(CALLZ16)), // TODO: Could be 3 too
+    SM83_INSTRUCTION_INFO(0xCC, "CALL Z, a16",   3, 6, 4, SM83_INSTRUCTION_STEPS_DECLARATION(CALLZ16)), // TODO: Could be 3 too
     SM83_INSTRUCTION_INFO(0xCD, "CALL a16",      3, 6, 0, SM83_INSTRUCTION_STEPS_DECLARATION(CALL16)),
     SM83_INSTRUCTION_INFO(0xCE, "ADC A, n8",     2, 2, 0, SM83_INSTRUCTION_STEPS_DECLARATION(ADCA8)),
     SM83_INSTRUCTION_INFO(0xCF, "RST $08",       1, 4, 0, SM83_INSTRUCTION_STEPS_DECLARATION(RST08)),
 
     // 0xD0
-    SM83_INSTRUCTION_INFO(0xD0, "RET NC",        1, 5, 0, SM83_INSTRUCTION_STEPS_DECLARATION(RETNC)), // TODO: Could be 2 too 
+    SM83_INSTRUCTION_INFO(0xD0, "RET NC",        1, 5, 4, SM83_INSTRUCTION_STEPS_DECLARATION(RETNC)), // TODO: Could be 2 too 
     SM83_INSTRUCTION_INFO(0xD1, "POP DE",        1, 3, 0, SM83_INSTRUCTION_STEPS_DECLARATION(POPDE)),
-    SM83_INSTRUCTION_INFO(0xD2, "JR NC, a16",    1, 4, 0, SM83_INSTRUCTION_STEPS_DECLARATION(JRNC16)), // TODO: Could be 3 too 
+    SM83_INSTRUCTION_INFO(0xD2, "JR NC, a16",    1, 4, 2, SM83_INSTRUCTION_STEPS_DECLARATION(JRNC16)), // TODO: Could be 3 too 
     SM83_INSTRUCTION_INFO(0xD3, "---",           1, 1, 0, SM83_INSTRUCTION_STEPS_DECLARATION(UNDEFINED_0xD3)),
-    SM83_INSTRUCTION_INFO(0xD4, "CALL NC, a16",  3, 6, 0, SM83_INSTRUCTION_STEPS_DECLARATION(CALLNC16)), // TODO: Could be 3 too 
+    SM83_INSTRUCTION_INFO(0xD4, "CALL NC, a16",  3, 6, 4, SM83_INSTRUCTION_STEPS_DECLARATION(CALLNC16)), // TODO: Could be 3 too 
     SM83_INSTRUCTION_INFO(0xD5, "PUSH DE",       1, 4, 0, SM83_INSTRUCTION_STEPS_DECLARATION(PUSHDE)),
     SM83_INSTRUCTION_INFO(0xD6, "SUB A, n8",     2, 2, 0, SM83_INSTRUCTION_STEPS_DECLARATION(SUBA8)),
     SM83_INSTRUCTION_INFO(0xD7, "RST $10",       1, 4, 0, SM83_INSTRUCTION_STEPS_DECLARATION(RST10)),
-    SM83_INSTRUCTION_INFO(0xD8, "RET C",         1, 5, 0, SM83_INSTRUCTION_STEPS_DECLARATION(RETC)), // TODO: Could be 2 too 
+    SM83_INSTRUCTION_INFO(0xD8, "RET C",         1, 5, 4, SM83_INSTRUCTION_STEPS_DECLARATION(RETC)), // TODO: Could be 2 too 
     SM83_INSTRUCTION_INFO(0xD9, "RETI",          1, 4, 0, SM83_INSTRUCTION_STEPS_DECLARATION(RETI)),
-    SM83_INSTRUCTION_INFO(0xDA, "JP C, a16",     3, 4, 0, SM83_INSTRUCTION_STEPS_DECLARATION(JPC16)), // TODO: Could be 3 too 
+    SM83_INSTRUCTION_INFO(0xDA, "JP C, a16",     3, 4, 2, SM83_INSTRUCTION_STEPS_DECLARATION(JPC16)), // TODO: Could be 3 too 
     SM83_INSTRUCTION_INFO(0xDB, "---",           1, 1, 0, SM83_INSTRUCTION_STEPS_DECLARATION(UNDEFINED_0xDB)),
     SM83_INSTRUCTION_INFO(0xDC, "CALL C, a16",   3, 6, 0, SM83_INSTRUCTION_STEPS_DECLARATION(CALLC16)), // TODO: Could be 3 too
     SM83_INSTRUCTION_INFO(0xDD, "---",           1, 1, 0, SM83_INSTRUCTION_STEPS_DECLARATION(UNDEFINED_0xDD)),
