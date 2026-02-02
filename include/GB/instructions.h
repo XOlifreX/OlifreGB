@@ -148,8 +148,8 @@
     u16 result = REGISTER1 - REGISTER2 - FLAGS.C; \
     FLAGS.Z = (result & 0x00FF) == 0x00; \
     FLAGS.N = 1; \
-    FLAGS.H = (REGISTER1 & 0x0F) < ((REGISTER2 - FLAGS.C) & 0x0F); \
-    FLAGS.C = REGISTER1 < (REGISTER2 - FLAGS.C); \
+    FLAGS.H = (REGISTER1 & 0x0F) < ((REGISTER2 & 0x0F) + FLAGS.C); \
+    FLAGS.C = REGISTER1 < (REGISTER2 + FLAGS.C); \
     REGISTER1 = result;
 
 #define SM83_AND_R8_R8(REGISTER1, REGISTER2, FLAGS) \
@@ -172,23 +172,23 @@
     u16 result = REGISTER1 | REGISTER2; \
     FLAGS.Z = ((u8) result) == 0x0; \
     FLAGS.N = 0; \
-    FLAGS.H = 1; \
+    FLAGS.H = 0; \
     FLAGS.C = 0; \
     REGISTER1 = result;
 
 #define SM83_CP_R8_R8(REGISTER1, REGISTER2, FLAGS) \
     u16 result = REGISTER1 - REGISTER2; \
-    FLAGS.C = IS_CARRY_SET_SUB_U8(REGISTER1, REGISTER2); \
+    FLAGS.Z = ((u8) result) == 0x0; \
     FLAGS.N = 1; \
-    FLAGS.H = (result > 0x0F) ? 1 : 0; \
-    FLAGS.Z = ((u8) result) == 0x0;
+    FLAGS.H = (REGISTER1 & 0x0F) < (REGISTER2 & 0x0F); \
+    FLAGS.C = REGISTER1 < REGISTER2;
 
 #define SM83_ADD_R8_IMM8(REGISTER, VALUE, FLAGS) \
     u16 result = REGISTER + VALUE; \
-    FLAGS.C = IS_CARRY_SET_ADD_U8(REGISTER, VALUE); \
+    FLAGS.Z = ((u8) result) == 0x0; \
     FLAGS.N = 0; \
     FLAGS.H = (result > 0x0F) ? 1 : 0; \
-    FLAGS.Z = ((u8) result) == 0x0; \
+    FLAGS.C = IS_CARRY_SET_ADD_U8(REGISTER, VALUE); \
     REGISTER = result;
 
 #define SM83_ADD_R16_IMM8_SIGNED(REGISTER, VALUE, FLAGS) \

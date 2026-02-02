@@ -11,7 +11,7 @@ bool run_sm83_test(SM83TestCase test) {
 
     bool passed = true;
 
-    if (test.name.compare("90 ca 32") == 0) {
+    if (test.name.compare("98 c1 54") == 0) {
         int i = 0;
     }
 
@@ -107,25 +107,25 @@ void run_sm83_tests() {
     std::string testPath = "test";
     
     // Get list of JSON files
-    // std::vector<std::string> files = getFileListOfDirectory(testPath.c_str());
-    std::vector<std::string> files;
+    std::vector<std::string> files = getFileListOfDirectory(testPath.c_str());
+    // std::vector<std::string> files;
 
-    // files.push_back("90.json");
-    // files.push_back("91.json");
-    // files.push_back("92.json");
-    // files.push_back("93.json");
-    // files.push_back("94.json");
-    // files.push_back("95.json");
-    // files.push_back("96.json");
-    // files.push_back("97.json");
-    files.push_back("98.json");
-    // files.push_back("99.json");
-    // files.push_back("9A.json");
-    // files.push_back("9B.json");
-    // files.push_back("9C.json");
-    // files.push_back("9D.json");
-    // files.push_back("9E.json");
-    // files.push_back("9F.json");
+    // files.push_back("B0.json");
+    // files.push_back("B1.json");
+    // files.push_back("B2.json");
+    // files.push_back("B3.json");
+    // files.push_back("B4.json");
+    // files.push_back("B5.json");
+    // files.push_back("B6.json");
+    // files.push_back("B7.json");
+    // files.push_back("B8.json");
+    // files.push_back("B9.json");
+    // files.push_back("BA.json");
+    // files.push_back("BB.json");
+    // files.push_back("BC.json");
+    // files.push_back("BD.json");
+    // files.push_back("BE.json");
+    // files.push_back("BF.json");
 
     std::cout << "Found " << files.size() << " test files." << std::endl;
     for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it) {
@@ -133,6 +133,9 @@ void run_sm83_tests() {
 
         if (file.find(".json") == std::string::npos)
             continue;
+
+        if (file.compare("c0.json") == 0)
+            break;
 
         std::vector<SM83TestCase> tests = parse_sm83_test(file);
         std::cout << "Loaded " << tests.size() << " tests." << std::endl;
