@@ -11,7 +11,7 @@ bool run_sm83_test(SM83TestCase test) {
 
     bool passed = true;
 
-    if (test.name.compare("c2 46 c6") == 0) {
+    if (test.name.compare("f8 22 11") == 0) {
         int i = 0;
     }
 
@@ -106,28 +106,11 @@ void run_sm83_tests() {
     std::string testPath = "test";
     
     // Get list of JSON files
-    // std::vector<std::string> files = getFileListOfDirectory(testPath.c_str());
-    std::vector<std::string> files;
+    std::vector<std::string> files = getFileListOfDirectory(testPath.c_str());
+    // std::vector<std::string> files;
     
     // FINAL BOSS
     // files.push_back("CB.json");
-
-    files.push_back("D0.json");
-    // files.push_back("D1.json");
-    // files.push_back("D2.json");
-    // files.push_back("D3.json");
-    // files.push_back("D4.json");
-    // files.push_back("D5.json");
-    // files.push_back("D6.json");
-    // files.push_back("D7.json");
-    // files.push_back("D8.json");
-    // files.push_back("D9.json");
-    // files.push_back("DA.json");
-    // files.push_back("DB.json");
-    // files.push_back("DC.json");
-    // files.push_back("DD.json");
-    // files.push_back("DE.json");
-    // files.push_back("DF.json");
 
     std::cout << "Found " << files.size() << " test files." << std::endl;
     for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it) {
@@ -136,8 +119,8 @@ void run_sm83_tests() {
         if (file.find(".json") == std::string::npos)
             continue;
 
-        if (file.compare("c0.json") == 0)
-            break;
+        if (file.compare("cb.json") == 0)
+            continue;
 
         std::vector<SM83TestCase> tests = parse_sm83_test(file);
         std::cout << "Loaded " << tests.size() << " tests." << std::endl;
