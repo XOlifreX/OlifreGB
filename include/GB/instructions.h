@@ -20,13 +20,29 @@
 
 #define SM83_RLC(REGISTER, FLAGS) \
     u16 shifted = (REGISTER << 1) | (REGISTER >> 7); \
+    FLAGS.Z = ((u8) shifted) == 0x00; \
+    FLAGS.N = 0; \
+    FLAGS.H = 0; \
+    FLAGS.C = REGISTER >> 0x7; \
+    REGISTER = shifted;
+    
+#define SM83_RLC_NO_ZERO(REGISTER, FLAGS) \
+    u16 shifted = (REGISTER << 1) | (REGISTER >> 7); \
     FLAGS.Z = 0; \
     FLAGS.N = 0; \
     FLAGS.H = 0; \
-    FLAGS.C = (shifted > 0xFF) ? 1 : 0; \
-    REGISTER = (u8)shifted;
+    FLAGS.C = REGISTER >> 0x7; \
+    REGISTER = shifted;
     
 #define SM83_RRC(REGISTER, FLAGS) \
+    u8 shifted = (REGISTER >> 1) | (REGISTER << 7); \
+    FLAGS.Z = ((u8) shifted) == 0x00; \
+    FLAGS.N = 0; \
+    FLAGS.H = 0; \
+    FLAGS.C = REGISTER & 0x01; \
+    REGISTER = shifted;
+    
+#define SM83_RRC_NO_ZERO(REGISTER, FLAGS) \
     u8 shifted = (REGISTER >> 1) | (REGISTER << 7); \
     FLAGS.Z = 0; \
     FLAGS.N = 0; \
@@ -36,27 +52,35 @@
 
 #define SM83_RL(REGISTER, FLAGS) \
     u16 shifted = (REGISTER << 1) | FLAGS.C; \
+    FLAGS.Z = ((u8) shifted) == 0x00; \
+    FLAGS.N = 0; \
+    FLAGS.H = 0; \
+    FLAGS.C = REGISTER >> 7; \
+    REGISTER = shifted;
+
+#define SM83_RL_NO_ZERO(REGISTER, FLAGS) \
+    u16 shifted = (REGISTER << 1) | FLAGS.C; \
     FLAGS.Z = 0; \
     FLAGS.N = 0; \
     FLAGS.H = 0; \
     FLAGS.C = REGISTER >> 7; \
-    REGISTER = (u8)shifted;
+    REGISTER = shifted;
 
 #define SM83_RR(REGISTER, FLAGS) \
     u16 shifted = (REGISTER >> 1) | (FLAGS.C << 7); \
-    FLAGS.Z = 0; \
-    FLAGS.N = 0; \
-    FLAGS.H = 0; \
-    FLAGS.C = REGISTER & 0x01; \
-    REGISTER = (u8)shifted;
-
-#define SM83_SLA(REGISTER, FLAGS) \
-    u16 shifted = (REGISTER << 1) | (REGISTER & 0x80); \
     FLAGS.Z = ((u8) shifted) == 0x00; \
     FLAGS.N = 0; \
     FLAGS.H = 0; \
-    FLAGS.C = (shifted > 0xFF) ? 1 : 0; \
-    REGISTER = (u8)shifted;
+    FLAGS.C = REGISTER & 0x01; \
+    REGISTER = shifted;
+
+#define SM83_SLA(REGISTER, FLAGS) \
+    u16 shifted = (REGISTER << 1) & 0xFE; \
+    FLAGS.Z = ((u8) shifted) == 0x00; \
+    FLAGS.N = 0; \
+    FLAGS.H = 0; \
+    FLAGS.C = REGISTER >> 7; \
+    REGISTER = shifted;
 
 #define SM83_SRA(REGISTER, FLAGS) \
     u16 shifted = (REGISTER >> 1) | (REGISTER & 0x80); \
@@ -64,7 +88,7 @@
     FLAGS.N = 0; \
     FLAGS.H = 0; \
     FLAGS.C = REGISTER & 0x01; \
-    REGISTER = (u8)shifted;
+    REGISTER = shifted;
 
 #define SM83_SWAP(REGISTER, FLAGS) \
     u8 result = (REGISTER >> 4) | (REGISTER << 4); \
@@ -75,7 +99,7 @@
     REGISTER = result;
 
 #define SM83_SRL(REGISTER, FLAGS) \
-    u16 shifted = (REGISTER >> 1); \
+    u16 shifted = (REGISTER >> 1) & 0x7F; \
     FLAGS.Z = ((u8) shifted) == 0x00; \
     FLAGS.N = 0; \
     FLAGS.H = 0; \

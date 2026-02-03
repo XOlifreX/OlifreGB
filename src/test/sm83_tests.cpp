@@ -11,10 +11,6 @@ bool run_sm83_test(SM83TestCase test) {
 
     bool passed = true;
 
-    if (test.name.compare("f8 22 11") == 0) {
-        int i = 0;
-    }
-
     // **************************
     // Init CPU state
     cpu->registers.A = test.initial.a;
@@ -86,7 +82,7 @@ bool run_sm83_test(SM83TestCase test) {
     return passed;
 }
 
-void run_sm83_test_cases(std::vector<SM83TestCase> tests) {
+u16 run_sm83_test_cases(std::vector<SM83TestCase> tests) {
     u16 successCount = 0;
     
     for (std::vector<SM83TestCase>::const_iterator it2 = tests.begin(); it2 != tests.end(); ++it2) {
@@ -98,28 +94,24 @@ void run_sm83_test_cases(std::vector<SM83TestCase> tests) {
     }
 
     std::cout << std::dec << successCount << "/" << tests.size() << " (" << ((successCount / tests.size()) * 100) << "%) PASSED!" << std::endl;
+
+    return tests.size() - successCount;
 }
 
 // **********
 
 void run_sm83_tests() {
+    u16 failedTestsCount = 0;
     std::string testPath = "test";
     
     // Get list of JSON files
     std::vector<std::string> files = getFileListOfDirectory(testPath.c_str());
-    // std::vector<std::string> files;
-    
-    // FINAL BOSS
-    // files.push_back("CB.json");
 
     std::cout << "Found " << files.size() << " test files." << std::endl;
     for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it) {
         const std::string& file = *it;
 
         if (file.find(".json") == std::string::npos)
-            continue;
-
-        if (file.compare("cb.json") == 0)
             continue;
 
         std::vector<SM83TestCase> tests = parse_sm83_test(file);
@@ -130,8 +122,11 @@ void run_sm83_tests() {
             continue;
         }
         
-        run_sm83_test_cases(tests);
+        failedTestsCount += run_sm83_test_cases(tests);
     }
+
+    std::cout << "========= TESTING COMPLETED =========" << std::endl;
+    std::cout << "Failed tests: " << std::dec << failedTestsCount << "!" << std::endl;
 }
 
 // ******************************

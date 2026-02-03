@@ -44,14 +44,14 @@ SM83Cpu::~SM83Cpu() {
 
 // Perform one M-cycle
 void SM83Cpu::tick() {
+    bool CBModeInstructionExecuted = false;
+
     // Get CB prefix instruction
     if (this->context.CBMode) {
-        u8 instruction = this->bus->readMemoryU8(this->registers.PC);
+        u8 instruction = this->bus->readMemoryU8(this->registers.PC - 1);
         this->context.currentInstruction = &opcodesCbTable[instruction];
 
-        this->context.currentStep = 0;
-        this->context.CBMode = false;
-        this->context.instruction_exit_early = false;
+        CBModeInstructionExecuted = true;
       
         if (this->debugPrint)
             std::cout << "PC:  0x" << std::hex << this->registers.PC << ": " << this->context.currentInstruction->name << " (CB Prefix)" << std::endl;
@@ -60,7 +60,10 @@ void SM83Cpu::tick() {
     // Execute one instruction M-cycle
     if (this->debugPrint)
         std::cout << "    Executing " << std::dec << this->context.currentStep << " of " << this->context.currentInstruction->name << std::endl;
-    (*(this->context.currentInstruction->steps)[this->context.currentStep])(this);
+    
+    u8 stepCount = this->context.currentStep - CBModeInstructionExecuted;
+    (*(this->context.currentInstruction->steps)[stepCount])(this);
+    
 
     // In case an instruction exits early, set steps forward to propper exit M-cycle
     if (this->context.skipSteps > 0) {
@@ -83,12 +86,17 @@ void SM83Cpu::tick() {
 
     // Fetch next instruction if previous completed
     if (this->context.currentStep == this->context.currentInstruction->cycles) {
+        // Keep some instruction context when the CB mode has been enabled by instruction 0xCB!
+        bool isCBModeEnabled = this->context.currentInstruction->opcode == 0xCB;
+
         u8 instruction = this->bus->readMemoryU8(this->registers.PC - 1);
         this->context.currentInstruction = &opcodesTable[instruction];
         
-        this->context.currentStep = 0;
-        this->context.CBMode = false;
-        this->context.instruction_exit_early = false;
+        if (!isCBModeEnabled) {
+            this->context.currentStep = 0;
+            this->context.CBMode = false;
+            this->context.instruction_exit_early = false;
+        }
         
         if (this->debugPrint)
             std::cout << std::endl << std::endl << "PC:  0x" << std::hex << this->registers.PC << ": " << this->context.currentInstruction->name << std::endl;
