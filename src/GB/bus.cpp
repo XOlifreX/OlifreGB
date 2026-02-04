@@ -13,15 +13,20 @@ Bus::Bus(Cartridge* cartridge) {
 }
 
 Bus::~Bus() {
-    if (this->cartridge != NULL) {
+    if (this->cartridge != NULL)
         delete this->cartridge;
-    }
+
+    delete this->rom;
+    delete this->ram;
 }
 
 
 void Bus::init(Cartridge* cartridge) {
-    this->cartridge = cartridge;
     this->ram = new RAM();
+    this->rom = new ROM();
+
+    if (cartridge != NULL)
+        this->setCartridge(cartridge);
 
     this->lastAction.action = BA_None;
     this->lastAction.address = 0xFFFF;
@@ -34,23 +39,36 @@ void Bus::init(Cartridge* cartridge) {
 
 void Bus::setCartridge(Cartridge* cartridge) {
     this->cartridge = cartridge;
+
+    u8* temp = this->cartridge->getROMBank(0);
+    dynamic_cast<ROM*>(this->rom)->writeROM(temp);
 }
+
+Memory* Bus::getMemoryDestination(u16 address) {
+    if (this->rom->isAddressInRange(address))
+        return this->rom;
+    if (this->ram->isAddressInRange(address))
+        return this->ram;
+
+    std::cerr << "Out of bounds MEMORY READ:" << std::endl;
+    std::cerr << "Address:  0x" << std::hex << address << std::endl;
+    
+    exit(1);
+
+    return NULL;
+}
+
+// ******************************
 
 u8 Bus::readMemoryU8(u16 address, bool saveAction) {
     u8 value = 0xFF;
 
-    if (address >= CARTRIDGE_RANGE_FROM && address <= CARTRIDGE_RANGE_TO) {
-        if (this->cartridge == NULL) {
-            std::cout << "WARNING: Trying to access cartridge data when no ROM is available. Returning 0xFF" << std::endl;
+    Memory* dest = this->getMemoryDestination(address);
 
-            return value;
-        }
+    if (dest == NULL)
+        return value;
 
-        value = (u8) this->cartridge->readByte(address);
-    }
-    else {
-        value = (u8) this->ram->readMemoryU8(address - CARTRIDGE_RANGE_TO);
-    }
+    value = (u8) dest->readMemoryU8(address);
 
     if (saveAction) {
         this->lastAction.action = BA_Read;
@@ -64,39 +82,29 @@ u8 Bus::readMemoryU8(u16 address, bool saveAction) {
 s8 Bus::readMemoryS8(u16 address, bool saveAction) {
     u8 value = 0xFF;
 
-    if (address >= CARTRIDGE_RANGE_FROM && address <= CARTRIDGE_RANGE_TO) {
-        if (this->cartridge == NULL) {
-            std::cout << "WARNING: Trying to access cartridge data when no ROM is available. Returning 0xFF" << std::endl;
+    Memory* dest = this->getMemoryDestination(address);
 
-            return value;
-        }
-        
-        value = (s8) this->cartridge->readByte(address);
-    }
-    else {
-        value = (s8) this->ram->readMemoryU8(address - CARTRIDGE_RANGE_TO);
-    }
+    if (dest == NULL)
+        return value;
+
+    value = (s8) dest->readMemoryU8(address);
 
     if (saveAction) {
         this->lastAction.action = BA_Read;
         this->lastAction.address = address;
         this->lastAction.value = value;
     }
+
     return value;
 }
 
 void Bus::writeMemoryU8(u16 address, u8 value, bool saveAction) {
-    if (address >= CARTRIDGE_RANGE_FROM && address <= CARTRIDGE_RANGE_TO) {
-        if (this->cartridge == NULL) {
-            std::cout << "WARNING: Trying to write to cartridge data when no ROM is available." << std::endl;
-            return;
-        }
-        
-        this->cartridge->writeByte(address, value);
-    }
-    else {
-        this->ram->writeMemoryU8(address - CARTRIDGE_RANGE_TO, value);
-    }
+    Memory* dest = this->getMemoryDestination(address);
+
+    if (dest == NULL)
+        return;
+
+    dest->writeMemoryU8(address, value);
 
     if (saveAction) {
         this->lastAction.action = BA_Write;
@@ -104,3 +112,7 @@ void Bus::writeMemoryU8(u16 address, u8 value, bool saveAction) {
         this->lastAction.value = value;
     }
 }
+
+// ******************************
+// ******************************
+// ******************************

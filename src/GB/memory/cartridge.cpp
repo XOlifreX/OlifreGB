@@ -1,4 +1,4 @@
-#include "GB/cartridge.h"
+#include "GB/memory/cartridge.h"
 
 // ******************************
 
@@ -82,9 +82,7 @@ const char* ramSizeNames[] = {
 // ******************************
 // ******************************
 
-Cartridge::Cartridge(const char* path) {
-    this->initialized = false;
-
+Cartridge::Cartridge(const char* path) : Memory(0x0000, 0x8000) {
     this->cartridgeTypes[0x00] = "ROM ONLY";
     this->cartridgeTypes[0x01] = "MBC1";
     this->cartridgeTypes[0x02] = "MBC1+RAM";
@@ -256,18 +254,14 @@ Cartridge::Cartridge(const char* path) {
     this->oldLicenseeCodes[0xA7] = "Takara";
 
     if (path == NULL) {
-        this->data = (char*)malloc(sizeof(u8) * 0x4000);
         this->romSize = 0x06;
-        return;
     }
-
-    this->loadCartridge(path);
+    else {
+        this->loadCartridge(path);
+    }
 }
 
-Cartridge::~Cartridge() {
-    if (this->data != NULL)
-        delete this->data;
-}
+Cartridge::~Cartridge() {}
 
 // I HATE THIS
 PublisherKey Cartridge::getPublisherKey(const char* key) {
@@ -352,7 +346,7 @@ void Cartridge::loadCartridge(const char* path) {
 
     if (!file.read(buffer, size)) {
         std::cerr << "Error: Could not read rom file " << path << std::endl;
-        delete[] buffer;
+        free(buffer);
         
         exit(1);
     }
@@ -375,14 +369,15 @@ void Cartridge::loadCartridge(const char* path) {
     this->checksum = buffer[0x14D];
     this->gChecksum = charsToShort(buffer, size, 0x14E);
 
-    this->data = buffer;
+    free(this->data);
+    this->data = (u8*) buffer;
 }
 
 // ******************************
 // ******************************
 // ******************************
 
-
+// TODO: ROM range only from 0000 to 3FFF, but ROM size can be bigger than that. So bank switches need to happen?
 void Cartridge::printCartridgeData() {
     std::cout << "Title: " << this->title << std::endl;
     std::cout << "Manufacturer: " << this->mCode << std::endl;
@@ -396,7 +391,7 @@ void Cartridge::printCartridgeData() {
     std::cout << "Old licensee: " << this->oldLicenseeCodes[this->oldLicenseCode] << std::endl;
 }
 
-char Cartridge::readByte(u16 address) {
+u8 Cartridge::readMemoryU8(u16 address) {
     int actualRomSize = this->ROMSizes[this->romSize].size;
     if (address > actualRomSize || address < 0) {
         std::cerr << "Out of bounds READ:" << std::endl;
@@ -409,7 +404,7 @@ char Cartridge::readByte(u16 address) {
     return this->data[address];
 }
 
-void Cartridge::writeByte(u16 address, u8 value) {
+void Cartridge::writeMemoryU8(u16 address, u8 value) {
     int actualRomSize = this->ROMSizes[this->romSize].size;
     if (address > actualRomSize || address < 0) {
         std::cerr << "Out of bounds WRITE:" << std::endl;
@@ -420,4 +415,19 @@ void Cartridge::writeByte(u16 address, u8 value) {
     }
 
     this->data[address] = value;
+}
+
+u8* Cartridge::getROMBank(u8 bank) {
+    if (this->data == NULL)
+        return NULL;
+
+    if (bank != 0) {
+        // TODO: Support bank switching
+        return NULL;
+    }
+
+    u8* romData = (u8*) malloc(sizeof(u8) * 0x8000);
+    std::copy(this->data, this->data + 0x8000, romData);
+
+    return romData;
 }

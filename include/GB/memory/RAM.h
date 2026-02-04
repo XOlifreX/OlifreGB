@@ -4,8 +4,11 @@
 
 #include "GB/memory/memory.h"
 
+#include "GB/memory/OAM.h"
+#include "GB/memory/VRAM.h"
+#include "GB/memory/WRAM.h"
+
 #include <iostream>
-#include <malloc.h>
 
 #define INTERUPT_ENABLE_REGISTER 0xFFFF
 
@@ -15,6 +18,11 @@
 #define RAM_FULL_SIZE (RAM_RANGE_TO - RAM_RANGE_FROM + 1)
 
 class RAM: public Memory {
+private:
+    Memory* oam;
+    Memory* wram;
+    Memory* vram;
+
 public:
     RAM();
     ~RAM();

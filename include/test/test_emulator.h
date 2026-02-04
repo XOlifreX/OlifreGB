@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include "../emulator.h"
-#include "GB/cartridge.h"
+#include "GB/memory/cartridge.h"
 #include "GB/SM83.h"
 #include "GB/bus.h"
 

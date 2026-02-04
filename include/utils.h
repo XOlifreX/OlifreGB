@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <algorithm>
 
 extern short charsToShort(char* data, int size, int startIndex);
 extern int charsToInt(char* data, int size, int startIndex);

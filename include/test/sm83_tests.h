@@ -7,7 +7,7 @@
 #include "GB/bus.h"
 #include "GB/SM83.h"
 #include "GB/instructions.h"
-#include "GB/cartridge.h"
+#include "GB/memory/cartridge.h"
 
 #include <iostream>
 #include <string>

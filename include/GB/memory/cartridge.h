@@ -6,12 +6,18 @@
 #include <fstream>
 #include <cstring>
 #include <map>
+#include <algorithm>
 
 #include "global.h"
 #include "utils.h"
 
-#define CARTRIDGE_RANGE_FROM 0x0000
-#define CARTRIDGE_RANGE_TO 0x4000
+#include "GB/memory/memory.h"
+
+#define ROM_RANGE_FROM 0x0000
+#define ROM_RANGE_TO 0x3FFF
+
+#define ROM_RANGE_BANKN_FROM 0x4000
+#define ROM_RANGE_BANKN_TO 0x7FFF
 
 enum PublisherKey {
     None = 0,
@@ -89,11 +95,8 @@ struct RomSizeInfo {
     u16 banks;
 };
 
-class Cartridge {
+class Cartridge: public Memory {
 private:
-    bool  initialized;
-    char* data;
-
     int   entrypoint;
     char* nLogo;
     char* title;
@@ -123,8 +126,10 @@ public:
 
     void printCartridgeData();
 
-    char readByte(u16 address);
-    void writeByte(u16 address, u8 value);
+    u8 readMemoryU8(u16 address);
+    void writeMemoryU8(u16 address, u8 data);
+
+    u8* getROMBank(u8 bank);
 };
 
 #endif // CARTRIDGE_H

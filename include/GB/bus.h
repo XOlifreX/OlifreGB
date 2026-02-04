@@ -2,8 +2,9 @@
 #ifndef BUS_H
 #define BUS_H
 
-#include "GB/cartridge.h"
+#include "GB/memory/cartridge.h"
 #include "GB/memory/RAM.h"
+#include "GB/memory/ROM.h"
 
 // **********
 
@@ -25,8 +26,10 @@ class Bus {
 private:
     Cartridge* cartridge;
     Memory* ram;
+    Memory* rom;
 
     void init(Cartridge* cartridge);
+    Memory* getMemoryDestination(u16 address);
 public:
     Bus();
     Bus(Cartridge* cartridge);

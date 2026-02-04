@@ -1,6 +1,8 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
+#include <iostream>
+
 typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;

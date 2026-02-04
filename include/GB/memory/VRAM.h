@@ -1,15 +1,23 @@
-#include "global.h"
+#pragma once
+#ifndef VRAM_H
+#define VRAM_H
 
-class VRAM {
-private:
-    u8* data;
-    const u16 MIN_VRAM = 0x8000;
-    const u16 MAX_VRAM = 0x9FFF;
+#include "GB/memory/memory.h"
 
+#include <iostream>
+
+#define VRAM_RANGE_FROM 0x8000
+#define VRAM_RANGE_TO 0x9FFF
+
+#define VRAM_FULL_SIZE (RAM_RANGE_TO - RAM_RANGE_FROM + 1)
+
+class VRAM: public Memory {
 public:
     VRAM();
     ~VRAM();
 
     u8 readMemoryU8(u16 address);
     void writeMemoryU8(u16 address, u8 data);
-}
+};
+
+#endif // VRAM_H
