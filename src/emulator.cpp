@@ -33,6 +33,7 @@ void Emulator::initWindow() {
 
 void Emulator::loadRom(const char* rom) {
     this->cartridge = new Cartridge(rom);
+    this->cartridge->printCartridgeData();
 
     this->bus->setCartridge(this->cartridge);
 }

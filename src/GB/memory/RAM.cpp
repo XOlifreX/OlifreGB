@@ -6,6 +6,7 @@ RAM::RAM() : Memory(RAM_RANGE_FROM, RAM_RANGE_TO) {
     this->oam = new OAM();
     this->wram = new WRAM();
     this->vram = new VRAM();
+    this->sram = new SRAM();
 }
 
 RAM::~RAM() {
@@ -38,4 +39,11 @@ void RAM::writeMemoryU8(u16 address, u8 value) {
     }
 
     this->data[address - RAM_RANGE_FROM] = value;
+}
+
+void RAM::setSRAM(Memory* sram) {
+    if (this->sram != NULL)
+        delete this->sram;
+
+    this->sram = sram;
 }

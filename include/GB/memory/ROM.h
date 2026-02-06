@@ -13,6 +13,9 @@
 #define ROM_RANGE_BANKN_TO 0x7FFF
 
 class ROM: public Memory {
+private:
+    u8 MBC_Mode;
+
 public:
     ROM();
     ~ROM();

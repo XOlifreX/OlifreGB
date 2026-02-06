@@ -38,6 +38,7 @@ public:
     BusLastAction lastAction;
 
     void setCartridge(Cartridge* cartridge);
+    void setSRAM(Memory* sram);
 
     virtual u8 readMemoryU8(u16 address, bool saveAction = true);
     virtual s8 readMemoryS8(u16 address, bool saveAction = true);

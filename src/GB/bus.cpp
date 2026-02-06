@@ -37,13 +37,6 @@ void Bus::init(Cartridge* cartridge) {
 // ******************************
 // ******************************
 
-void Bus::setCartridge(Cartridge* cartridge) {
-    this->cartridge = cartridge;
-
-    u8* temp = this->cartridge->getROMBank(0);
-    dynamic_cast<ROM*>(this->rom)->writeROM(temp);
-}
-
 Memory* Bus::getMemoryDestination(u16 address) {
     if (this->rom->isAddressInRange(address))
         return this->rom;
@@ -56,6 +49,17 @@ Memory* Bus::getMemoryDestination(u16 address) {
     exit(1);
 
     return NULL;
+}
+
+void Bus::setCartridge(Cartridge* cartridge) {
+    this->cartridge = cartridge;
+
+    u8* temp = this->cartridge->getROMBank(0);
+    dynamic_cast<ROM*>(this->rom)->writeROM(temp);
+}
+
+void Bus::setSRAM(Memory* sram) {
+    dynamic_cast<RAM*>(this->ram)->setSRAM(sram);
 }
 
 // ******************************
