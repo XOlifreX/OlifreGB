@@ -19,10 +19,4 @@ extern void run_sm83_tests();
 
 // *****
 
-class SM83Test {
-    
-};
-
-// *****
-
 #endif // SM83_TESTS_H

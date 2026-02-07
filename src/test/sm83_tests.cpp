@@ -101,6 +101,8 @@ u16 run_sm83_test_cases(std::vector<SM83TestCase> tests) {
 // **********
 
 void run_sm83_tests() {
+    is_test_mode = true;
+
     u16 failedTestsCount = 0;
     std::string testPath = "test";
     

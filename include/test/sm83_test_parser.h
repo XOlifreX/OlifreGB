@@ -5,6 +5,7 @@
 #include "global.h"
 #include "lib/fs.h"
 #include "GB/bus.h"
+#include "test/test_mode.h"
 
 #include <iostream>
 #include <string>

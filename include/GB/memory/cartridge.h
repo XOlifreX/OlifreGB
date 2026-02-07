@@ -11,6 +11,8 @@
 #include "GB/memory/SRAM.h"
 #include "GB/memory/ROM.h"
 
+#include "test/test_mode.h"
+
 #define ROM_RANGE_FROM 0x0000
 #define ROM_RANGE_TO 0x3FFF
 

@@ -73,6 +73,9 @@ u8 Cartridge::readMemoryU8(u16 address) {
 }
 
 void Cartridge::writeMemoryU8(u16 address, u8 value) {
+    if (!is_test_mode)
+        return;
+
     int romSize = this->info->getROMSize();
     if (address > romSize || address < 0) {
         std::cerr << "Out of bounds CARTRIDGE WRITE:" << std::endl;
