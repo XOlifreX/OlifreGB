@@ -5,9 +5,13 @@
 #include <iostream>
 #include <cstdlib>
 #include <algorithm>
+#include <cstring>
+#include <string>
 
-extern short charsToShort(char* data, int size, int startIndex);
-extern int charsToInt(char* data, int size, int startIndex);
-extern char* spliceChars(char* data, int size, int startIndex, int length);
+#include "global.h"
+
+extern u16          charsToU16(const char* data, u32 size, u32 startIndex);
+extern u32          charsToU32(const char* data, u32 size, u32 startIndex);
+extern std::string  charsToString(const char* data, u32 size, u32 startIndex, u32 length);
 
 #endif // UTILS_H

@@ -10,8 +10,8 @@
 
 int main(int argc, char* argv[])
 {
-    // run_sm83_tests();
-    // return 0;
+    run_sm83_tests();
+    return 0;
 
     std::cout << "Starting" << std::endl;
     

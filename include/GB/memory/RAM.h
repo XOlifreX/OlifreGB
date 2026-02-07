@@ -7,7 +7,6 @@
 #include "GB/memory/OAM.h"
 #include "GB/memory/VRAM.h"
 #include "GB/memory/WRAM.h"
-#include "GB/memory/SRAM.h"
 
 #include <iostream>
 
@@ -20,10 +19,9 @@
 
 class RAM: public Memory {
 private:
-    Memory* oam;
-    Memory* wram;
-    Memory* vram;
-    Memory* sram;
+    OAM* oam;
+    WRAM* wram;
+    VRAM* vram;
 
 public:
     RAM();
@@ -31,8 +29,6 @@ public:
 
     u8 readMemoryU8(u16 address);
     void writeMemoryU8(u16 address, u8 data);
-
-    void setSRAM(Memory* sram);
 };
 
 // https://gbdev.io/pandocs/Memory_Map.html#fea0feff-range

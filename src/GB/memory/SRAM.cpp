@@ -3,6 +3,7 @@
 // *****
 
 SRAM::SRAM() : Memory(SRAM_RANGE_FROM, SRAM_RANGE_TO) {}
+SRAM::~SRAM() {}
 
 // *****
 
@@ -10,7 +11,7 @@ void SRAM::writeSRAM(u8* sram) {
     if (this->data != NULL)
         free(this->data);
 
-    this->data = rom;
+    this->data = sram;
 }
 
 u8* SRAM::readSRAM() {
@@ -25,7 +26,7 @@ u8 SRAM::readMemoryU8(u16 address) {
         exit(1);
     }
 
-    return this->data[address];
+    return this->data[address - SRAM_RANGE_FROM];
 }
 
 void SRAM::writeMemoryU8(u16 address, u8 value) {
@@ -36,5 +37,5 @@ void SRAM::writeMemoryU8(u16 address, u8 value) {
         exit(1);
     }
 
-    this->data[address] = value;
+    this->data[address - SRAM_RANGE_FROM] = value;
 }

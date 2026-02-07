@@ -3,6 +3,7 @@
 // *****
 
 WRAM::WRAM() : Memory(WRAM_RANGE_FROM, WRAM_RANGE_TO) {}
+WRAM::~WRAM() {}
 
 // *****
 

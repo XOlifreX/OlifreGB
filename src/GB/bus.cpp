@@ -16,14 +16,13 @@ Bus::~Bus() {
     if (this->cartridge != NULL)
         delete this->cartridge;
 
-    delete this->rom;
     delete this->ram;
 }
 
+// ******************************
 
 void Bus::init(Cartridge* cartridge) {
     this->ram = new RAM();
-    this->rom = new ROM();
 
     if (cartridge != NULL)
         this->setCartridge(cartridge);
@@ -38,8 +37,8 @@ void Bus::init(Cartridge* cartridge) {
 // ******************************
 
 Memory* Bus::getMemoryDestination(u16 address) {
-    if (this->rom->isAddressInRange(address))
-        return this->rom;
+    if (this->cartridge->isAddressInRange(address))
+        return this->cartridge->getMemoryDestination(address);
     if (this->ram->isAddressInRange(address))
         return this->ram;
 
@@ -53,13 +52,6 @@ Memory* Bus::getMemoryDestination(u16 address) {
 
 void Bus::setCartridge(Cartridge* cartridge) {
     this->cartridge = cartridge;
-
-    u8* temp = this->cartridge->getROMBank(0);
-    dynamic_cast<ROM*>(this->rom)->writeROM(temp);
-}
-
-void Bus::setSRAM(Memory* sram) {
-    dynamic_cast<RAM*>(this->ram)->setSRAM(sram);
 }
 
 // ******************************

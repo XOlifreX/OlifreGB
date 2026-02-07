@@ -3,12 +3,12 @@
 // *****
 
 Memory::Memory(u16 range_from, u16 range_to) : RANGE_FROM(range_from), RANGE_TO(range_to) {
-    this->data = (u8*) malloc(sizeof(u8) * ((range_to - range_from) + 1));
+    this->data = new u8[sizeof(u8) * ((range_to - range_from) + 1)];
 }
 
 Memory::~Memory() {
     if (this->data != NULL)
-        free(this->data);
+        delete[] this->data;
 }
 
 // *****

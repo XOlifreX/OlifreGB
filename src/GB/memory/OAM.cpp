@@ -3,6 +3,7 @@
 // *****
 
 OAM::OAM() : Memory(OAM_RANGE_FROM, OAM_RANGE_TO) {}
+OAM::~OAM() {}
 
 // *****
 

@@ -3,6 +3,7 @@
 // *****
 
 ROM::ROM() : Memory(ROM_RANGE_FROM, ROM_RANGE_TO) {}
+ROM::~ROM() {}
 
 // *****
 
@@ -21,7 +22,7 @@ u8 ROM::readMemoryU8(u16 address) {
         exit(1);
     }
 
-    return this->data[address];
+    return this->data[address - ROM_RANGE_FROM];
 }
 
 void ROM::writeMemoryU8(u16 address, u8 value) {
@@ -32,5 +33,5 @@ void ROM::writeMemoryU8(u16 address, u8 value) {
         exit(1);
     }
 
-    this->data[address] = value;
+    this->data[address - ROM_RANGE_FROM] = value;
 }

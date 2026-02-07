@@ -19,7 +19,7 @@ public:
     virtual u8 readMemoryU8(u16 address) = 0;
     virtual void writeMemoryU8(u16 address, u8 data) = 0;
 
-    bool isAddressInRange(u16 address);
+    virtual bool isAddressInRange(u16 address);
 };
 
 #endif // MEMORY_H

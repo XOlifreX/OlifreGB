@@ -3,6 +3,7 @@
 // *****
 
 VRAM::VRAM() : Memory(VRAM_RANGE_FROM, VRAM_RANGE_TO) {}
+VRAM::~VRAM() {}
 
 // *****
 

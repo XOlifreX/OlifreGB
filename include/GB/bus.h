@@ -25,8 +25,7 @@ struct BusLastAction {
 class Bus {
 private:
     Cartridge* cartridge;
-    Memory* ram;
-    Memory* rom;
+    RAM* ram;
 
     void init(Cartridge* cartridge);
     Memory* getMemoryDestination(u16 address);
@@ -38,7 +37,6 @@ public:
     BusLastAction lastAction;
 
     void setCartridge(Cartridge* cartridge);
-    void setSRAM(Memory* sram);
 
     virtual u8 readMemoryU8(u16 address, bool saveAction = true);
     virtual s8 readMemoryS8(u16 address, bool saveAction = true);

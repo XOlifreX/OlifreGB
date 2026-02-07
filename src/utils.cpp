@@ -1,6 +1,6 @@
 #include "utils.h"
 
-short charsToShort(char* data, int size, int startIndex) {
+u16 charsToU16(const char* data, u32 size, u32 startIndex) {
     if (startIndex >= (size - 2) || 0 > startIndex) {
         std::cerr << "Trying to read a short from data that goes out of bounds." << std::endl;
         std::cerr << "Size: 0x" << std::hex << size << ", index: 0x" << startIndex;
@@ -13,7 +13,7 @@ short charsToShort(char* data, int size, int startIndex) {
     );
 }
 
-int charsToInt(char* data, int size, int startIndex) {
+u32 charsToU32(const char* data, u32 size, u32 startIndex) {
     if (startIndex >= (size - 4) || 0 > startIndex) {
         std::cerr << "Trying to read an int from data that goes out of bounds." << std::endl;
         std::cerr << "Size: 0x" << std::hex << size << ", index: 0x" << startIndex;
@@ -28,19 +28,22 @@ int charsToInt(char* data, int size, int startIndex) {
     );
 }
 
-char* spliceChars(char* data, int size, int startIndex, int length) {
+std::string charsToString(const char* data, u32 size, u32 startIndex, u32 length) {
     if (startIndex >= (size - length) || 0 > startIndex) {
         std::cerr << "Trying slice data that goes out of bounds." << std::endl;
         std::cerr << "Size: 0x" << std::hex << size << ", index: 0x" << startIndex;
         exit(1);
     }
 
-    char* buffer = (char*) malloc(sizeof(char) * (length + 1));
+    char* buffer = new char[sizeof(char) * (length + 1)];
 
     for (int i = 0; i < length; i++)
         buffer[i] = data[startIndex + i];
 
     buffer[length + 1] = '\0';
 
-    return buffer;
+    std::string temp(buffer);
+    delete buffer;
+
+    return temp;
 }
