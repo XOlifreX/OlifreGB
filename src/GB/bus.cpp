@@ -38,7 +38,7 @@ void Bus::init(Cartridge* cartridge) {
 
 Memory* Bus::getMemoryDestination(u16 address) {
     if (this->cartridge->isAddressInRange(address))
-        return this->cartridge->getMemoryDestination(address);
+        return this->cartridge;
     if (this->ram->isAddressInRange(address))
         return this->ram;
 

@@ -7,10 +7,11 @@ ROM::~ROM() {}
 
 // *****
 
-void ROM::writeROM(u8* rom) {
+void ROM::writeROM(u8* rom, u32 size) {
     if (this->data != NULL)
         free(this->data);
 
+    this->size = size;
     this->data = rom;
 }
 

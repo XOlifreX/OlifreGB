@@ -7,24 +7,38 @@
 Cartridge::Cartridge(const char* path) : Memory(0x0000, 0x8000) {
     this->info = new CartridgeInfo();
 
-    this->sram = new SRAM();
-    this->rom = new ROM();
+    SRAM* sram = new SRAM();
+    ROM* rom = new ROM();
     
     if (path == NULL) {
-        this->info->cartInfo.romSize = 0x06;
+        // 512 KiB
+        this->info->cartInfo.romSize = 0x03;
+        // 8 KiB
+        this->info->cartInfo.ramSize = _8KiB;
+        // No MBC
+        this->info->cartInfo.type = 0x00;
+        
+        this->initSRAM(sram);
     }
     else {
-        this->loadCartridge(path);
+        this->initROM(rom, path);
+        this->initSRAM(sram);
     }
+
+    this->initMBC(rom, sram);
 }
 
 Cartridge::~Cartridge() {
+    delete this->mbc;
     delete this->info;
 }
 
 // ******************************
 
-void Cartridge::loadCartridge(const char* path) {
+void Cartridge::initROM(ROM* rom, const char* path) {
+    if (path == NULL)
+        return;
+
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file) {
         std::cerr << "Error: Could not find rom file " << path << std::endl;
@@ -46,7 +60,111 @@ void Cartridge::loadCartridge(const char* path) {
     file.close();
 
     this->info->setCartridgeInfo(buffer, size);
-    this->rom->writeROM((u8*) buffer);
+    rom->writeROM((u8*) buffer, size);
+}
+
+void Cartridge::initSRAM(SRAM* sram) {
+    u8* temp = NULL;
+    u32 size = 0;
+
+    u8 sizeId = this->info->cartInfo.ramSize;
+
+    if (sizeId == _8KiB) {
+        temp = new u8[sizeof(u8) * 0x2000];
+        size = 0x2000;
+    }
+
+    if (sizeId == _32KiB) {
+        temp = new u8[sizeof(u8) * 0x8000];
+        size = 0x8000;
+    }
+
+    if (sizeId == _128KiB) {
+        temp = new u8[sizeof(u8) * 0x20000];
+        size = 0x20000;
+    }
+
+    if (sizeId == _64KiB) {
+        temp = new u8[sizeof(u8) * 0x10000];
+        size = 0x10000;
+    }
+
+    sram->writeSRAM(temp, size);
+}
+
+void Cartridge::initMBC(ROM* rom, SRAM* sram) {
+    this->mbc = NULL;
+
+    // No MBC (Mapper)
+    if (this->info->cartInfo.type == 0x00) {
+        this->mbc = new MBC(this->info, sram, rom);
+        return;
+    }
+
+    // MBC1
+    if (this->info->cartInfo.type >= 0x01 && this->info->cartInfo.type < 0x04) {
+        // this->mbc = new MBC(this->info, sram, rom);
+        return;
+    }
+
+    // MBC2
+    if (this->info->cartInfo.type >= 0x05 && this->info->cartInfo.type < 0x07) {
+        // this->mbc = new MBC(this->info, sram, rom);
+        return;
+    }
+
+    // MBC3
+    if (this->info->cartInfo.type >= 0x0F && this->info->cartInfo.type < 0x14) {
+        // this->mbc = new MBC(this->info, sram, rom);
+        return;
+    }
+
+    // MBC5
+    if (this->info->cartInfo.type >= 0x19 && this->info->cartInfo.type < 0x1F) {
+        // this->mbc = new MBC(this->info, sram, rom);
+        return;
+    }
+
+    // MBC6
+    if (this->info->cartInfo.type == 0x20) {
+        // this->mbc = new MBC(this->info, sram, rom);
+        return;
+    }
+
+    // MBC7
+    if (this->info->cartInfo.type == 0x22) {
+        // this->mbc = new MBC(this->info, sram, rom);
+        return;
+    }
+
+    // MMM01
+    if (this->info->cartInfo.type >= 0x08 && this->info->cartInfo.type < 0x0E) {
+        // this->mbc = new MBC(this->info, sram, rom);
+        return;
+    }
+
+    // M161
+    // TODO: Find which ID this mapper uses
+    if (false) {
+        // this->mbc = new MBC(this->info, sram, rom);
+        return;
+    }
+
+    // HuC1
+    if (this->info->cartInfo.type == 0xFF) {
+        // this->mbc = new MBC(this->info, sram, rom);
+        return;
+    }
+
+    // HuC-3
+    if (this->info->cartInfo.type == 0xFE) {
+        // this->mbc = new MBC(this->info, sram, rom);
+        return;
+    }
+
+    // Unknown type, using no MBC
+    // Could be MBC1M, EMS, Wisdom Tree, ...
+    this->mbc = new MBC(this->info, sram, rom);
 }
 
 // ******************************
@@ -59,84 +177,18 @@ void Cartridge::printCartridgeData() {
 
 // ******************************
 
-u8 Cartridge::readMemoryU8(u16 address) {
-    int romSize = this->info->getROMSize();
-    if (address > romSize || address < 0) {
-        std::cerr << "Out of bounds CARTRIDGE READ:" << std::endl;
-        std::cerr << "Address:  0x" << std::hex << address << std::endl;
-        std::cerr << "ROM size: 0x" << std::hex << romSize;
-
-        exit(1);
-    }
-
-    return this->data[address];
+inline u8 Cartridge::readMemoryU8(u16 address) {
+    return this->mbc->readU8(address);
 }
 
-void Cartridge::writeMemoryU8(u16 address, u8 value) {
-    if (!is_test_mode)
-        return;
-
-    int romSize = this->info->getROMSize();
-    if (address > romSize || address < 0) {
-        std::cerr << "Out of bounds CARTRIDGE WRITE:" << std::endl;
-        std::cerr << "Address:  0x" << std::hex << address << std::endl;
-        std::cerr << "ROM size: 0x" << std::hex << romSize;
-
-        exit(1);
-    }
-
-    this->data[address] = value;
+inline void Cartridge::writeMemoryU8(u16 address, u8 value) {
+    this->mbc->writeU8(address, value);
 }
 
 // ******************************
 
 bool Cartridge::isAddressInRange(u16 address) {
-    Memory* temp = NULL;
-
-    if (this->rom->isAddressInRange(address))
-        temp = this->rom;
-    if (this->sram->isAddressInRange(address))
-        temp = this->sram;
-
-    return temp != NULL;
-}
-
-Memory* Cartridge::getMemoryDestination(u16 address) {
-    if (this->rom->isAddressInRange(address))
-        return this->rom;
-    if (this->sram->isAddressInRange(address))
-        return this->sram;
-
-    std::cerr << "Out of bounds CARTRIDGE READ:" << std::endl;
-    std::cerr << "Address:  0x" << std::hex << address << std::endl;
-    
-    exit(1);
-
-    return NULL;
-}
-
-// ******************************
-
-u8* Cartridge::getROMBank(u8 bank) {
-    if (this->data == NULL)
-        return NULL;
-
-    if (bank != 0) {
-        // TODO: Support bank switching
-        return NULL;
-    }
-
-    u8* romData = new u8[sizeof(u8) * 0x8000];
-    std::copy(this->data, this->data + 0x8000, romData);
-
-    return romData;
-}
-
-void Cartridge::setSRAM(SRAM* sram) {
-    if (this->sram != NULL)
-        delete this->sram;
-
-    this->sram = sram;
+    return this->mbc->isAddressInRange(address);
 }
 
 // ******************************

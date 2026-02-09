@@ -3,7 +3,8 @@
 // *****
 
 Memory::Memory(u16 range_from, u16 range_to) : RANGE_FROM(range_from), RANGE_TO(range_to) {
-    this->data = new u8[sizeof(u8) * ((range_to - range_from) + 1)];
+    this->size = (range_to - range_from + 1);
+    this->data = new u8[sizeof(u8) * this->size];
 }
 
 Memory::~Memory() {

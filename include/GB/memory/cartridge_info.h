@@ -77,6 +77,15 @@ enum PublisherKey {
     UNKNOWN
 };
 
+enum SRAMSizes {
+    _0KiB = 0,
+    _NoSRAM,
+    _8KiB,
+    _32KiB,
+    _128KiB,
+    _64KiB,
+};
+
 struct RomSizeInfo {
     const char* name;
     u32 size;

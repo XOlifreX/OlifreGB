@@ -14,7 +14,7 @@ public:
     SRAM();
     ~SRAM();
 
-    void writeSRAM(u8* sramm);
+    void writeSRAM(u8* sram, u32 size);
     u8* readSRAM();
 
     u8 readMemoryU8(u16 address);

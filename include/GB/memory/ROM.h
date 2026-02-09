@@ -20,7 +20,7 @@ public:
     ROM();
     ~ROM();
 
-    void writeROM(u8* rom);
+    void writeROM(u8* rom, u32 size);
 
     u8 readMemoryU8(u16 address);
     void writeMemoryU8(u16 address, u8 data);

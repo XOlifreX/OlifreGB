@@ -9,6 +9,8 @@
 class Memory {
 protected:
     u8* data;
+    u32 size;
+    
     const u16 RANGE_FROM;
     const u16 RANGE_TO;
 

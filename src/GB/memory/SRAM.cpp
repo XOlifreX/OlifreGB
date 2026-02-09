@@ -7,10 +7,11 @@ SRAM::~SRAM() {}
 
 // *****
 
-void SRAM::writeSRAM(u8* sram) {
+void SRAM::writeSRAM(u8* sram, u32 size) {
     if (this->data != NULL)
         free(this->data);
 
+    this->size = size;
     this->data = sram;
 }
 

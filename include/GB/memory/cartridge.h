@@ -10,25 +10,18 @@
 #include "GB/memory/memory.h"
 #include "GB/memory/SRAM.h"
 #include "GB/memory/ROM.h"
-
-#include "test/test_mode.h"
-
-#define ROM_RANGE_FROM 0x0000
-#define ROM_RANGE_TO 0x3FFF
-
-#define ROM_RANGE_BANKN_FROM 0x4000
-#define ROM_RANGE_BANKN_TO 0x7FFF
+#include "GB/memory/MBC/MBC.h"
 
 class Cartridge: public Memory {
 private:    
     CartridgeInfo* info;
-    
-    SRAM* sram;
-    ROM* rom;
 
-    void loadCartridge(const char* path);
+    MBC* mbc;
+
+    void initROM(ROM* rom, const char* path);
+    void initSRAM(SRAM* sram);
+    void initMBC(ROM* rom, SRAM* sram);
 public:
-    Cartridge();
     Cartridge(const char* path);
     ~Cartridge();
 
@@ -38,10 +31,6 @@ public:
     void writeMemoryU8(u16 address, u8 data);
     
     bool isAddressInRange(u16 address);
-    Memory* getMemoryDestination(u16 address);
-
-    u8* getROMBank(u8 bank);
-    void setSRAM(SRAM* sram);
 };
 
 #endif // CARTRIDGE_H
