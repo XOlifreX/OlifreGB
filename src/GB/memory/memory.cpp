@@ -14,8 +14,12 @@ Memory::~Memory() {
 
 // *****
 
-bool Memory::isAddressInRange(u16 address) {
+bool Memory::isAddressInRange(u32 address) {
     return (address >= this->RANGE_FROM && address <= this->RANGE_TO);
+}
+
+bool Memory::isAddressInSizeRange(u32 address) {
+    return 0 <= address && address < this->size;
 }
 
 // *****

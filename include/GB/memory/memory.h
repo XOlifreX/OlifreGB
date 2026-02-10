@@ -18,10 +18,11 @@ public:
     Memory(u16 range_from, u16 range_to);
     ~Memory();
 
-    virtual u8 readMemoryU8(u16 address) = 0;
-    virtual void writeMemoryU8(u16 address, u8 data) = 0;
+    virtual u8 readMemoryU8(u32 address) = 0;
+    virtual void writeMemoryU8(u32 address, u8 data) = 0;
 
-    virtual bool isAddressInRange(u16 address);
+    virtual bool isAddressInRange(u32 address);
+    virtual bool isAddressInSizeRange(u32 address);
 };
 
 #endif // MEMORY_H

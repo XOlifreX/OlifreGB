@@ -42,7 +42,7 @@ Memory* Bus::getMemoryDestination(u16 address) {
     if (this->ram->isAddressInRange(address))
         return this->ram;
 
-    std::cerr << "Out of bounds MEMORY READ:" << std::endl;
+    std::cerr << "Out of bounds MEMORY ACCESS:" << std::endl;
     std::cerr << "Address:  0x" << std::hex << address << std::endl;
     
     exit(1);

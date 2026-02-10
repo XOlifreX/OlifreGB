@@ -18,13 +18,13 @@ MBC::~MBC() {
 
 // *****************************
 
-Memory* MBC::getMemoryDestination(u16 address) {
+Memory* MBC::getMemoryDestination(u32 address) {
     if (this->rom->isAddressInRange(address))
         return this->rom;
     if (this->sram->isAddressInRange(address))
         return this->sram;
 
-    std::cerr << "Out of bounds CARTRIDGE READ:" << std::endl;
+    std::cerr << "Out of bounds CARTRIDGE ACCESS:" << std::endl;
     std::cerr << "Address:  0x" << std::hex << address << std::endl;
 
     return NULL;
@@ -32,7 +32,7 @@ Memory* MBC::getMemoryDestination(u16 address) {
 
 // *****************************
 
-bool MBC::isAddressInRange(u16 address) {
+bool MBC::isAddressInRange(u32 address) {
     Memory* temp = NULL;
 
     if (this->rom->isAddressInRange(address))
@@ -45,7 +45,7 @@ bool MBC::isAddressInRange(u16 address) {
 
 // *****************************
 
-u8 MBC::readU8(u16 address) {
+u8 MBC::readU8(u32 address) {
     u8 value = 0xFF;
 
     Memory* dest = this->getMemoryDestination(address);
@@ -58,10 +58,7 @@ u8 MBC::readU8(u16 address) {
     return value;
 }
 
-void MBC::writeU8(u16 address, u8 data) {
-    if (!is_test_mode)
-        return;
-
+void MBC::writeU8(u32 address, u8 data) {
     Memory* dest = this->getMemoryDestination(address);
 
     if (dest == NULL)

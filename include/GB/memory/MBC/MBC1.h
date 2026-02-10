@@ -7,6 +7,30 @@
 
 // **********
 
+#define MBC1_ROM_BANK_SIZE              0x4000
+
+#define MBC1_ROM_LOWER_FROM             0x0000
+#define MBC1_ROM_LOWER_TO               0x3FFF
+
+#define MBC1_IS_ADDRESS_IN_LOWER_ROM_REGION(ADDRESS) \
+    ADDRESS >= MBC1_ROM_LOWER_FROM && ADDRESS <= MBC1_ROM_LOWER_TO
+
+#define MBC1_ROM_HIGHER_FROM            0x4000
+#define MBC1_ROM_HIGHER_TO              0x7FFF
+
+#define MBC1_IS_ADDRESS_IN_HIGHER_ROM_REGION(ADDRESS) \
+    ADDRESS >= MBC1_ROM_HIGHER_FROM && ADDRESS <= MBC1_ROM_HIGHER_TO
+    
+#define MBC1_RAM_BANK_SIZE              0x2000
+
+#define MBC1_RAM_FROM                   0xA000
+#define MBC1_RAM_TO                     0xBFFF
+
+#define MBC1_IS_ADDRESS_IN_RAM_REGION(ADDRESS) \
+    ADDRESS >= MBC1_RAM_FROM && ADDRESS <= MBC1_RAM_TO
+
+// **********
+
 #define MBC1_RAM_ENABLE_FROM            0x0000
 #define MBC1_RAM_ENABLE_TO              0x1FFF
 
@@ -24,8 +48,8 @@
 // **********
 
 enum MBC1BankMode {
-    Simple = 0,
-    Advanced = 1,
+    MBC1_Simple_Mode = 0,
+    MBC1_Advanced_Mode = 1,
 };
 
 // **********
@@ -41,7 +65,10 @@ private:
     u8 romBitMaskingNum;
 
     void initMBC1Values();
-public:
+
+    u32 translateROMAddress(u16 address);
+    u32 translateRAMAddress(u16 address);
+    public:
     MBC1(CartridgeInfo* cartInfo, SRAM* sram, ROM* rom);
     ~MBC1();
 

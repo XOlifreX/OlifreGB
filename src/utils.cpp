@@ -35,7 +35,7 @@ std::string charsToString(const char* data, u32 size, u32 startIndex, u32 length
         exit(1);
     }
 
-    char* buffer = new char[sizeof(char) * (length + 1)];
+    char buffer[sizeof(char) * (length + 1)];
 
     for (int i = 0; i < length; i++)
         buffer[i] = data[startIndex + i];
@@ -43,7 +43,6 @@ std::string charsToString(const char* data, u32 size, u32 startIndex, u32 length
     buffer[length + 1] = '\0';
 
     std::string temp(buffer);
-    delete buffer;
 
     return temp;
 }

@@ -17,8 +17,8 @@ public:
     void writeSRAM(u8* sram, u32 size);
     u8* readSRAM();
 
-    u8 readMemoryU8(u16 address);
-    void writeMemoryU8(u16 address, u8 data);
+    u8 readMemoryU8(u32 address);
+    void writeMemoryU8(u32 address, u8 data);
 };
 
 #endif // SRAM_H

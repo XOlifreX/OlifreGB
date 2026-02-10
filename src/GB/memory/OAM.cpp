@@ -7,7 +7,7 @@ OAM::~OAM() {}
 
 // *****
 
-u8 OAM::readMemoryU8(u16 address) {
+u8 OAM::readMemoryU8(u32 address) {
     if (!this->isAddressInRange(address)) {
         std::cerr << "Out of bounds OAM READ:" << std::endl;
         std::cerr << "Address:  0x" << std::hex << address << std::endl;
@@ -18,7 +18,7 @@ u8 OAM::readMemoryU8(u16 address) {
     return this->data[address - OAM_RANGE_FROM];
 }
 
-void OAM::writeMemoryU8(u16 address, u8 value) {
+void OAM::writeMemoryU8(u32 address, u8 value) {
     if (!this->isAddressInRange(address)) {
         std::cerr << "Out of bounds OAM WRITE:" << std::endl;
         std::cerr << "Address:  0x" << std::hex << address << std::endl;

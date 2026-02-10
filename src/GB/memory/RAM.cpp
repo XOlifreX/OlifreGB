@@ -14,28 +14,42 @@ RAM::~RAM() {
     delete this->vram;
 }
 
-// *****
+// *****************************
 
-u8 RAM::readMemoryU8(u16 address) {
-    // TODO: Add seperation
-    if (!this->isAddressInRange(address)) {
-        std::cerr << "Out of bounds RAM READ:" << std::endl;
-        std::cerr << "Address:  0x" << std::hex << address << std::endl;
+Memory* RAM::getMemoryDestination(u32 address) {
+    if (this->oam->isAddressInRange(address))
+        return this->oam;
+    if (this->wram->isAddressInRange(address))
+        return this->wram;
+    if (this->vram->isAddressInRange(address))
+        return this->vram;
 
-        exit(1);
-    }
+    std::cerr << "Out of bounds RAM Access:" << std::endl;
+    std::cerr << "Address:  0x" << std::hex << address << std::endl;
 
-    return this->data[address - RAM_RANGE_FROM];
+    return NULL;
 }
 
-void RAM::writeMemoryU8(u16 address, u8 value) {
-    // TODO: Add seperation
-    if (!this->isAddressInRange(address)) {
-        std::cerr << "Out of bounds RAM WRITE:" << std::endl;
-        std::cerr << "Address:  0x" << std::hex << address << std::endl;
+// *****************************
 
-        exit(1);
-    }
+u8 RAM::readMemoryU8(u32 address) {
+    u8 value = 0xFF;
 
-    this->data[address - RAM_RANGE_FROM] = value;
+    Memory* dest = this->getMemoryDestination(address);
+
+    if (dest == NULL)
+        return value;
+
+    value = (s8) dest->readMemoryU8(address);
+
+    return value;
+}
+
+void RAM::writeMemoryU8(u32 address, u8 value) {
+    Memory* dest = this->getMemoryDestination(address);
+
+    if (dest == NULL)
+        return;
+
+    dest->writeMemoryU8(address, value);
 }

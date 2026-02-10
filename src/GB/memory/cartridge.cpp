@@ -12,12 +12,13 @@ Cartridge::Cartridge(const char* path) : Memory(0x0000, 0x8000) {
     
     if (path == NULL) {
         // 512 KiB
-        this->info->cartInfo.romSize = 0x03;
+        this->info->cartInfo.romSize = rom32KiB;
         // 8 KiB
         this->info->cartInfo.ramSize = ram8KiB;
         // No MBC
         this->info->cartInfo.type = 0x00;
         
+        this->initROM(rom, NULL);
         this->initSRAM(sram);
     }
     else {
@@ -36,8 +37,12 @@ Cartridge::~Cartridge() {
 // ******************************
 
 void Cartridge::initROM(ROM* rom, const char* path) {
-    if (path == NULL)
+    if (path == NULL) {
+        char* buffer = new char[0x8000];
+        rom->writeROM((u8*) buffer, 0x8000);
+
         return;
+    }
 
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file) {
@@ -177,17 +182,17 @@ void Cartridge::printCartridgeData() {
 
 // ******************************
 
-inline u8 Cartridge::readMemoryU8(u16 address) {
+inline u8 Cartridge::readMemoryU8(u32 address) {
     return this->mbc->readU8(address);
 }
 
-inline void Cartridge::writeMemoryU8(u16 address, u8 value) {
+inline void Cartridge::writeMemoryU8(u32 address, u8 value) {
     this->mbc->writeU8(address, value);
 }
 
 // ******************************
 
-bool Cartridge::isAddressInRange(u16 address) {
+bool Cartridge::isAddressInRange(u32 address) {
     return this->mbc->isAddressInRange(address);
 }
 

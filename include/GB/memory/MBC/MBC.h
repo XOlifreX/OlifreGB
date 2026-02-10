@@ -17,15 +17,15 @@ protected:
     SRAM* sram;
     ROM* rom;
     
-    Memory* getMemoryDestination(u16 address);
+    Memory* getMemoryDestination(u32 address);
 public:
     MBC(CartridgeInfo* cartInfo, SRAM* sram, ROM* rom);
     ~MBC();
 
-    bool isAddressInRange(u16 address);
+    bool isAddressInRange(u32 address);
 
-    virtual u8 readU8(u16 address);
-    virtual void writeU8(u16 address, u8 data);
+    virtual u8 readU8(u32 address);
+    virtual void writeU8(u32 address, u8 data);
 };
 
 // **********
