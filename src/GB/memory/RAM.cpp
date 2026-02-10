@@ -6,12 +6,16 @@ RAM::RAM() : Memory(RAM_RANGE_FROM, RAM_RANGE_TO) {
     this->oam = new OAM();
     this->wram = new WRAM();
     this->vram = new VRAM();
+    this->nuram = new NotUsableRAM();
+    this->hram = new HRAM();
 }
 
 RAM::~RAM() {
     delete this->oam;
     delete this->wram;
     delete this->vram;
+    delete this->nuram;
+    delete this->hram;
 }
 
 // *****************************
@@ -23,6 +27,10 @@ Memory* RAM::getMemoryDestination(u32 address) {
         return this->wram;
     if (this->vram->isAddressInRange(address))
         return this->vram;
+    if (this->nuram->isAddressInRange(address) && is_test_mode)
+        return this->nuram;
+    if (this->hram->isAddressInRange(address))
+        return this->hram;
 
     std::cerr << "Out of bounds RAM Access:" << std::endl;
     std::cerr << "Address:  0x" << std::hex << address << std::endl;

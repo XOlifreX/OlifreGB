@@ -6,8 +6,6 @@
 #include "GB/memory/SRAM.h"
 #include "GB/memory/ROM.h"
 
-#include "test/test_mode.h"
-
 // **********
 
 class MBC {

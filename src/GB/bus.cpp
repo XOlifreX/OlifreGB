@@ -23,6 +23,7 @@ Bus::~Bus() {
 
 void Bus::init(Cartridge* cartridge) {
     this->ram = new RAM();
+    this->io = new IO();
 
     if (cartridge != NULL)
         this->setCartridge(cartridge);
@@ -39,6 +40,8 @@ void Bus::init(Cartridge* cartridge) {
 Memory* Bus::getMemoryDestination(u16 address) {
     if (this->cartridge->isAddressInRange(address))
         return this->cartridge;
+    if (this->io->isAddressInRange(address))
+        return this->io;
     if (this->ram->isAddressInRange(address))
         return this->ram;
 

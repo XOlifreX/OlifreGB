@@ -7,6 +7,11 @@
 #include "GB/memory/OAM.h"
 #include "GB/memory/VRAM.h"
 #include "GB/memory/WRAM.h"
+#include "GB/memory/WRAM.h"
+#include "GB/memory/NotUsableRAM.h"
+#include "GB/memory/HRAM.h"
+
+#include "test/test_mode.h"
 
 #include <iostream>
 
@@ -22,6 +27,8 @@ private:
     OAM* oam;
     WRAM* wram;
     VRAM* vram;
+    NotUsableRAM* nuram;
+    HRAM* hram;
 
     Memory* getMemoryDestination(u32 address);
 public:

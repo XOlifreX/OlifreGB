@@ -5,6 +5,7 @@
 #include "GB/memory/cartridge.h"
 #include "GB/memory/RAM.h"
 #include "GB/memory/ROM.h"
+#include "GB/memory/IO.h"
 
 // **********
 
@@ -26,6 +27,7 @@ class Bus {
 private:
     Cartridge* cartridge;
     RAM* ram;
+    IO* io;
 
     void init(Cartridge* cartridge);
     Memory* getMemoryDestination(u16 address);
