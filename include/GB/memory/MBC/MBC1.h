@@ -66,14 +66,15 @@ private:
 
     void initMBC1Values();
 
-    u32 translateROMAddress(u16 address);
-    u32 translateRAMAddress(u16 address);
-    public:
+    u32 translateROMAddress(u32 address);
+    u32 translateRAMAddress(u32 address);
+    
+public:
     MBC1(CartridgeInfo* cartInfo, SRAM* sram, ROM* rom);
     ~MBC1();
 
-    virtual u8 readU8(u16 address);
-    virtual void writeU8(u16 address, u8 data);
+    u8 readU8(u32 address);
+    void writeU8(u32 address, u8 data);
 };
 
 #endif // MBC1_H

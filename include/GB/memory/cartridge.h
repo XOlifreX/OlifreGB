@@ -10,7 +10,10 @@
 #include "GB/memory/memory.h"
 #include "GB/memory/SRAM.h"
 #include "GB/memory/ROM.h"
+
 #include "GB/memory/MBC/MBC.h"
+#include "GB/memory/MBC/MBC1.h"
+#include "GB/memory/MBC/MBC2.h"
 
 class Cartridge: public Memory {
 private:    

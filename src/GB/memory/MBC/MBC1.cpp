@@ -33,7 +33,7 @@ void MBC1::initMBC1Values() {
 
 // *****************************
 
-u32 MBC1::translateROMAddress(u16 address) {
+u32 MBC1::translateROMAddress(u32 address) {
     if (MBC1_IS_ADDRESS_IN_LOWER_ROM_REGION(address)) {
         // Mode 0 (Simple) will always have the lower ROM bank be bank 0, so no translation is needed.
         if (this->bankingMode == MBC1_Simple_Mode)
@@ -64,7 +64,7 @@ u32 MBC1::translateROMAddress(u16 address) {
     return bankAddress + address;
 }
 
-u32 MBC1::translateRAMAddress(u16 address) {
+u32 MBC1::translateRAMAddress(u32 address) {
     // If RAM size is only 8KiB, then no RAM bank select is available, so bank 0 is default
     if (this->cartInfo->cartInfo.ramSize <= ram8KiB)
         return address;
@@ -75,7 +75,7 @@ u32 MBC1::translateRAMAddress(u16 address) {
 
 // *****************************
 
-u8 MBC1::readU8(u16 address) {
+u8 MBC1::readU8(u32 address) {
     u8 value = 0xFF;
 
     if (this->sram->isAddressInRange(address)) {
@@ -95,7 +95,7 @@ u8 MBC1::readU8(u16 address) {
     return value;
 }
 
-void MBC1::writeU8(u16 address, u8 data) {
+void MBC1::writeU8(u32 address, u8 data) {
     if (this->sram->isAddressInRange(address)) {
         if (!this->enableRam)
             return;

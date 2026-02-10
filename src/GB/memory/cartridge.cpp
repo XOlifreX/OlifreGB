@@ -108,13 +108,13 @@ void Cartridge::initMBC(ROM* rom, SRAM* sram) {
 
     // MBC1
     if (this->info->cartInfo.type >= 0x01 && this->info->cartInfo.type < 0x04) {
-        // this->mbc = new MBC(this->info, sram, rom);
+        this->mbc = new MBC1(this->info, sram, rom);
         return;
     }
 
     // MBC2
     if (this->info->cartInfo.type >= 0x05 && this->info->cartInfo.type < 0x07) {
-        // this->mbc = new MBC(this->info, sram, rom);
+        this->mbc = new MBC2(this->info, sram, rom);
         return;
     }
 
