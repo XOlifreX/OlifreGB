@@ -336,6 +336,10 @@ u32 CartridgeInfo::getROMSize() {
     return this->ROMSizes[this->cartInfo.romSize].size;
 }
 
+u16 CartridgeInfo::getROMBankCount() {
+    return this->ROMSizes[this->cartInfo.romSize].banks;
+}
+
 void CartridgeInfo::printCartridgeData() {
     std::cout << "Title: " << this->cartInfo.title << std::endl;
     std::cout << "Manufacturer: " << this->cartInfo.mCode << std::endl;

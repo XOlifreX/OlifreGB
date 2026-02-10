@@ -16,7 +16,7 @@ protected:
 
     SRAM* sram;
     ROM* rom;
-
+    
     Memory* getMemoryDestination(u16 address);
 public:
     MBC(CartridgeInfo* cartInfo, SRAM* sram, ROM* rom);

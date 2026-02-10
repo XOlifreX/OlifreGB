@@ -77,13 +77,28 @@ enum PublisherKey {
     UNKNOWN
 };
 
+enum ROMSizes {
+    rom32KiB = 0x00,
+    rom64KiB = 0x01,
+    rom128KiB = 0x02,
+    rom256KiB = 0x03,
+    rom512KiB = 0x04,
+    rom1MiB = 0x05,
+    rom2MiB = 0x06,
+    rom4MiB = 0x07,
+    rom8MiB = 0x08,
+    rom1_1MiB = 0x52,
+    rom1_2MiB = 0x53,
+    rom1_5MiB = 0x54
+};
+
 enum SRAMSizes {
-    _0KiB = 0,
-    _NoSRAM,
-    _8KiB,
-    _32KiB,
-    _128KiB,
-    _64KiB,
+    ram0KiB = 0x00,
+    ramNoSRAM = 0x01,
+    ram8KiB = 0x02,
+    ram32KiB = 0x03,
+    ram128KiB = 0x04,
+    ram64KiB = 0x05
 };
 
 struct RomSizeInfo {
@@ -131,6 +146,7 @@ public:
     
     PublisherKey getPublisherKey(const char* key);
     u32 getROMSize();
+    u16 getROMBankCount();
 
     void printCartridgeData();
 };

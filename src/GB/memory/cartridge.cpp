@@ -14,7 +14,7 @@ Cartridge::Cartridge(const char* path) : Memory(0x0000, 0x8000) {
         // 512 KiB
         this->info->cartInfo.romSize = 0x03;
         // 8 KiB
-        this->info->cartInfo.ramSize = _8KiB;
+        this->info->cartInfo.ramSize = ram8KiB;
         // No MBC
         this->info->cartInfo.type = 0x00;
         
@@ -69,22 +69,22 @@ void Cartridge::initSRAM(SRAM* sram) {
 
     u8 sizeId = this->info->cartInfo.ramSize;
 
-    if (sizeId == _8KiB) {
+    if (sizeId == ram8KiB) {
         temp = new u8[sizeof(u8) * 0x2000];
         size = 0x2000;
     }
 
-    if (sizeId == _32KiB) {
+    if (sizeId == ram32KiB) {
         temp = new u8[sizeof(u8) * 0x8000];
         size = 0x8000;
     }
 
-    if (sizeId == _128KiB) {
+    if (sizeId == ram128KiB) {
         temp = new u8[sizeof(u8) * 0x20000];
         size = 0x20000;
     }
 
-    if (sizeId == _64KiB) {
+    if (sizeId == ram64KiB) {
         temp = new u8[sizeof(u8) * 0x10000];
         size = 0x10000;
     }

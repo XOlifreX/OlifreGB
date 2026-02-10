@@ -33,10 +33,14 @@ enum MBC1BankMode {
 class MBC1 : public MBC {
 private:
     bool enableRam;
-    u8 romBankNumber;
+    u8 romBankNumberLower;
+    u8 romBankNumberHigher;
     u8 ramBankNumber;
     MBC1BankMode bankingMode;
 
+    u8 romBitMaskingNum;
+
+    void initMBC1Values();
 public:
     MBC1(CartridgeInfo* cartInfo, SRAM* sram, ROM* rom);
     ~MBC1();
