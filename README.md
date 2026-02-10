@@ -5,9 +5,12 @@
 	- [x] Basic
 	- [ ] MBCs
 		- [x] MBC1
-		- [ ] MBC2
+		- [x] MBC2
 		- [ ] MBC3
+			- [X] MBC3 itself
+			- [ ] RTC
 		- [ ] MBC5
+		- [ ] MBC6
 		- [ ] MBC7
 		- [ ] Others
 - [ ] Interupts

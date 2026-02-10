@@ -14,6 +14,7 @@
 #include "GB/memory/MBC/MBC.h"
 #include "GB/memory/MBC/MBC1.h"
 #include "GB/memory/MBC/MBC2.h"
+#include "GB/memory/MBC/MBC3.h"
 
 class Cartridge: public Memory {
 private:    
