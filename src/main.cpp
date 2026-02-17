@@ -8,8 +8,7 @@
 // ******************************
 // ******************************
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     run_sm83_tests();
     return 0;
 

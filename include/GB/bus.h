@@ -2,10 +2,11 @@
 #ifndef BUS_H
 #define BUS_H
 
+#include "GB/memory/registers/hardware_registers.h"
+
 #include "GB/memory/cartridge.h"
 #include "GB/memory/RAM.h"
 #include "GB/memory/ROM.h"
-#include "GB/memory/IO.h"
 
 // **********
 
@@ -27,7 +28,6 @@ class Bus {
 private:
     Cartridge* cartridge;
     RAM* ram;
-    IO* io;
 
     void init(Cartridge* cartridge);
     Memory* getMemoryDestination(u16 address);
@@ -39,6 +39,7 @@ public:
     BusLastAction lastAction;
 
     void setCartridge(Cartridge* cartridge);
+    HardwareRegisterState* getHRStateRef();
 
     virtual u8 readMemoryU8(u16 address, bool saveAction = true);
     virtual s8 readMemoryS8(u16 address, bool saveAction = true);

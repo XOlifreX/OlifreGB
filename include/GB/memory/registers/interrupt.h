@@ -13,7 +13,7 @@
 #define INTR_IS_IN_REGION(ADDRESS) \
     ADDRESS >= INTR_RANGE_FROM && ADDRESS <= INTR_RANGE_TO
 
-enum InterrustTypes {
+enum InterruptTypes {
     Intr_None = 0x00,
     Intr_VBlank = 0x40,
     Intr_STAT = 0x48,
@@ -26,7 +26,7 @@ struct InterruptState {
     bool intrMasterEnable;
 
     union {
-        u8 _ : 3;
+        u8 _unused1 : 3;
         u8 intrEnableVBlank : 1;
         u8 intrEnableLCD : 1;
         u8 intrEnableTimer : 1;
@@ -37,7 +37,7 @@ struct InterruptState {
     };
     
     union {
-        u8 _ : 3;
+        u8 _unused2 : 3;
         u8 intrFlagVBlank : 1;
         u8 intrFlagLCD : 1;
         u8 intrFlagTimer : 1;
@@ -47,7 +47,7 @@ struct InterruptState {
         u8 intrFlags;
     };
 
-    InterrustTypes curr_req_intr;
+    InterruptTypes curr_req_intr;
 };
 
 class Interrupt : public Memory {
@@ -64,6 +64,6 @@ public:
     void writeMemoryU8(u32 address, u8 data);
     
     bool isAddressInRange(u32 address);
-}
+};
 
 #endif // INTERRUPTS_H

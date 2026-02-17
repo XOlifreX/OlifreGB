@@ -18,7 +18,16 @@ find_package(glad REQUIRED)
 
 include_directories(include ${OPENGL_INCLUDE_DIRS} ${GLFW3_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${GLAD_INCLUDE_DIRS})
 
-file(GLOB SOURCES src/*.cpp src/GB/*.cpp src/GB/memory/*.cpp src/GB/memory/MBC/*.cpp src/window/*.cpp src/lib/*.cpp src/test/*.cpp)
+file(GLOB SOURCES
+    src/*.cpp
+    src/GB/*.cpp
+    src/GB/memory/*.cpp
+    src/GB/memory/MBC/*.cpp 
+    src/GB/memory/registers/*.cpp 
+    src/window/*.cpp
+    src/lib/*.cpp
+    src/test/*.cpp
+)
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${GLAD_SOURCE_FILE})
 

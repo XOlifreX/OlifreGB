@@ -16,7 +16,9 @@ Emulator::Emulator() {
 }
 Emulator::~Emulator() {
     delete this->cpu;
-    delete this->bus;
+
+    if (this->bus != NULL)
+        delete this->bus;
 
     if (this->windowInitialized)
         glfwTerminate();

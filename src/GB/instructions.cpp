@@ -5744,7 +5744,10 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xD9: RETI (Return from interupt handler)
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETI,
-    cpu->intrState->intrMasterEnable = true;
+    if (!is_test_mode) {
+        cpu->hrState->intrState.intrMasterEnable = true;
+    }
+    
     cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
@@ -6588,7 +6591,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xF3: DI // Disable Interupts
 SM83_INSTRUCTION_IMPLEMENTATION(DI,
-    cpu->intrState->intrMasterEnable = false;
+    cpu->hrState->intrState.intrMasterEnable = false;
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -6737,7 +6740,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xFB: EI // Enable Interupts
 SM83_INSTRUCTION_IMPLEMENTATION(EI,
-    cpu->intrState->intrMasterEnable = true;
+    cpu->hrState->intrState.intrMasterEnable = true;
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -6988,8 +6991,8 @@ SM83_CB_INSTRUCTION_STEPS_IMPLEMENTATION(
 // ******************************************************************************************************
 
 // 0x100: Start Interrupt
-SM83_CB_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(STRT_INTR,)
-SM83_CB_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(STRT_INTR_P2,)
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(STRT_INTR,)
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(STRT_INTR_P2,)
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(STRT_INTR_P3,
     cpu->bus->writeMemoryU8(cpu->registers.SP, (cpu->registers.PC & 0xFF00) >> 0x8);
@@ -6997,20 +7000,20 @@ SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(STRT_INTR_P3,
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(STRT_INTR_P4,
-    cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC, & 0x00FF);
+    cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC & 0x00FF);
 )
 
-SM83_CB_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(STRT_INTR_P5,
-
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(STRT_INTR_P5,
+    cpu->registers.PC = cpu->hrState->intrState.curr_req_intr;
 )
 
-SM83_CB_INSTRUCTION_STEPS_IMPLEMENTATION(
+SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
     STRT_INTR,
-    SM83_CB_INSTRUCTION_DECLARATION(STRT_INTR),
-    SM83_CB_INSTRUCTION_DECLARATION(STRT_INTR_P2),
-    SM83_CB_INSTRUCTION_DECLARATION(STRT_INTR_P3),
-    SM83_CB_INSTRUCTION_DECLARATION(STRT_INTR_P4),
-    SM83_CB_INSTRUCTION_DECLARATION(STRT_INTR_P5)
+    SM83_INSTRUCTION_DECLARATION(STRT_INTR),
+    SM83_INSTRUCTION_DECLARATION(STRT_INTR_P2),
+    SM83_INSTRUCTION_DECLARATION(STRT_INTR_P3),
+    SM83_INSTRUCTION_DECLARATION(STRT_INTR_P4),
+    SM83_INSTRUCTION_DECLARATION(STRT_INTR_P5)
 );
 
 // ******************************************************************************************************

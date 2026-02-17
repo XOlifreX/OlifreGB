@@ -27,8 +27,7 @@ SM83Cpu::SM83Cpu(Bus* bus, bool debugPrint) {
 
     this->context = c;
 
-    this->intrState = new InterruptState;
-    this->intrState->intrMasterEnable = false;
+    this->hrState = this->bus->getHRStateRef();
 
     this->tCycle = 0;
     this->mCycle = 0;
@@ -87,16 +86,22 @@ void SM83Cpu::tick() {
 
     // Fetch next instruction if previous completed
     if (this->context.currentStep == this->context.currentInstruction->cycles) {
-        // Keep some instruction context when the CB mode has been enabled by instruction 0xCB!
-        bool isCBModeEnabled = this->context.currentInstruction->opcode == 0xCB;
+        // Check if an interrupt has occured
+        if (!this->hasInterrupt()) {
+            // Keep some instruction context when the CB mode has been enabled by instruction 0xCB!
+            bool isCBModeEnabled = this->context.currentInstruction->opcode == 0xCB;
 
-        u8 instruction = this->bus->readMemoryU8(this->registers.PC - 1);
-        this->context.currentInstruction = &opcodesTable[instruction];
-        
-        if (!isCBModeEnabled) {
-            this->context.currentStep = 0;
-            this->context.CBMode = false;
-            this->context.instruction_exit_early = false;
+            u8 instruction = this->bus->readMemoryU8(this->registers.PC - 1);
+            this->context.currentInstruction = &opcodesTable[instruction];
+            
+            if (!isCBModeEnabled) {
+                this->context.currentStep = 0;
+                this->context.CBMode = false;
+                this->context.instruction_exit_early = false;
+            }
+        }
+        else {
+            this->prepareInterrupt();
         }
         
         if (this->debugPrint)
@@ -105,6 +110,72 @@ void SM83Cpu::tick() {
 
     if (this->debugPrint)
         this->debug_print_state();
+}
+
+bool SM83Cpu::hasInterrupt() {
+    return this->hrState->intrState.intrMasterEnable
+        && this->hrState->intrState.intrEnable
+        && this->hrState->intrState.intrFlags > 0x0
+        && this->canHandleInterrupt();
+}
+
+bool SM83Cpu::canHandleInterrupt() {
+    if (this->hrState->intrState.intrEnableVBlank && this->hrState->intrState.intrFlagVBlank)
+        return true;
+    if (this->hrState->intrState.intrEnableLCD && this->hrState->intrState.intrFlagLCD)
+        return true;
+    if (this->hrState->intrState.intrEnableTimer && this->hrState->intrState.intrFlagTimer)
+        return true;
+    if (this->hrState->intrState.intrEnableSerial && this->hrState->intrState.intrFlagSerial)
+        return true;
+    if (this->hrState->intrState.intrEnableJoypad && this->hrState->intrState.intrFlagJoypad)
+        return true;
+
+    return false;
+}
+
+void SM83Cpu::prepareInterrupt() {
+    // Disable all interrupts
+    this->hrState->intrState.intrMasterEnable = false;
+
+    // Check which interrupt to handle (prio list)
+    if (this->hrState->intrState.intrFlagVBlank) {
+        this->hrState->intrState.intrFlagVBlank = 0;
+
+        this->hrState->intrState.curr_req_intr = Intr_VBlank;
+    }
+    else if (this->hrState->intrState.intrFlagLCD) {
+        this->hrState->intrState.intrFlagLCD = 0;
+
+        this->hrState->intrState.curr_req_intr = Intr_STAT;
+    }
+    else if (this->hrState->intrState.intrFlagTimer) {
+        this->hrState->intrState.intrFlagTimer = 0;
+
+        this->hrState->intrState.curr_req_intr = Intr_Timer;
+    }
+    else if (this->hrState->intrState.intrFlagSerial) {
+        this->hrState->intrState.intrFlagSerial = 0;
+
+        this->hrState->intrState.curr_req_intr = Intr_Serial;
+    }
+    else if (this->hrState->intrState.intrFlagJoypad) {
+        this->hrState->intrState.intrFlagJoypad = 0;
+
+        this->hrState->intrState.curr_req_intr = Intr_Joypad;
+    }
+    else {
+        exit(1);
+    }
+
+    // PC will be one ahead after handling an interrupt. So we decrease it by an extra one
+    this->registers.PC--;
+
+    this->context.currentInstruction = &opcodesTable[SM83_STRT_INTR_INDEX];
+
+    this->context.currentStep = 0;
+    this->context.CBMode = false;
+    this->context.instruction_exit_early = false;
 }
 
 void SM83Cpu::debug_print_state() {

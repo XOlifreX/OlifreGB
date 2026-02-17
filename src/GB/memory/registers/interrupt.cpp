@@ -1,9 +1,11 @@
-#include "GB/memory/interrupt.h"
+#include "GB/memory/registers/interrupt.h"
 
 // *****
 
 Interrupt::Interrupt(InterruptState* state) : Memory(INTR_RANGE_FROM, INTR_RANGE_TO) {
     this->state = state;
+    
+    this->state->intrMasterEnable = false;
 }
 
 Interrupt::~Interrupt() {}
@@ -25,7 +27,7 @@ u8 Interrupt::readMemoryU8(u32 address) {
     }
 
     u32 location = this->translateAddress(address);
-    return this->data[location - INTR_RANGE_FROM];
+    return this->data[location];
 }
 
 void Interrupt::writeMemoryU8(u32 address, u8 value) {
@@ -43,7 +45,7 @@ void Interrupt::writeMemoryU8(u32 address, u8 value) {
         this->state->intrFlags = value;
     
     u32 location = this->translateAddress(address);
-    this->data[location - INTR_RANGE_FROM] = value;
+    this->data[location] = value;
 }
 
 bool Interrupt::isAddressInRange(u32 address) {

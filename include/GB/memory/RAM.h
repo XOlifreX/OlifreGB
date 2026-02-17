@@ -2,6 +2,7 @@
 #ifndef RAM_H
 #define RAM_H
 
+#include "GB/memory/registers/hardware_registers.h"
 #include "GB/memory/memory.h"
 
 #include "GB/memory/OAM.h"
@@ -30,10 +31,14 @@ private:
     NotUsableRAM* nuram;
     HRAM* hram;
 
+    HardwareRegistors* hRegisters;
+
     Memory* getMemoryDestination(u32 address);
 public:
     RAM();
     ~RAM();
+
+    HardwareRegisterState* getHRStateRef();
 
     u8 readMemoryU8(u32 address);
     void writeMemoryU8(u32 address, u8 data);

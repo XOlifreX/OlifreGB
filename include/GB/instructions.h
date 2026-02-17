@@ -3,7 +3,9 @@
 #define OPCODES_H
 
 #include<vector>
+
 #include "global.h"
+#include "test/test_mode.h"
 
 // ********************
 
@@ -338,6 +340,8 @@
 // *****    
 
 #include "GB/SM83.h"
+
+#define SM83_STRT_INTR_INDEX 0x100
 
 extern const SM83Opcode opcodesTable[];
 extern const SM83Opcode opcodesCbTable[];
