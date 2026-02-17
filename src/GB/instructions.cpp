@@ -5744,7 +5744,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xD9: RETI (Return from interupt handler)
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETI,
-    cpu->IME = true;
+    cpu->intrState->intrMasterEnable = true;
     cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
 )
@@ -6588,7 +6588,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xF3: DI // Disable Interupts
 SM83_INSTRUCTION_IMPLEMENTATION(DI,
-    cpu->IME = false;
+    cpu->intrState->intrMasterEnable = false;
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -6737,7 +6737,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xFB: EI // Enable Interupts
 SM83_INSTRUCTION_IMPLEMENTATION(EI,
-    cpu->IME = true;
+    cpu->intrState->intrMasterEnable = true;
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -6981,6 +6981,36 @@ SM83_CB_INSTRUCTION_IMPLEMENTATION(SET7A,
 SM83_CB_INSTRUCTION_STEPS_IMPLEMENTATION(
     SET7A,
     SM83_CB_INSTRUCTION_DECLARATION(SET7A)
+);
+
+// ******************************************************************************************************
+// ************************************************ 0x100 ***********************************************
+// ******************************************************************************************************
+
+// 0x100: Start Interrupt
+SM83_CB_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(STRT_INTR,)
+SM83_CB_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(STRT_INTR_P2,)
+
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(STRT_INTR_P3,
+    cpu->bus->writeMemoryU8(cpu->registers.SP, (cpu->registers.PC & 0xFF00) >> 0x8);
+    cpu->registers.SP--;
+)
+
+SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(STRT_INTR_P4,
+    cpu->bus->writeMemoryU8(cpu->registers.SP, cpu->registers.PC, & 0x00FF);
+)
+
+SM83_CB_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(STRT_INTR_P5,
+
+)
+
+SM83_CB_INSTRUCTION_STEPS_IMPLEMENTATION(
+    STRT_INTR,
+    SM83_CB_INSTRUCTION_DECLARATION(STRT_INTR),
+    SM83_CB_INSTRUCTION_DECLARATION(STRT_INTR_P2),
+    SM83_CB_INSTRUCTION_DECLARATION(STRT_INTR_P3),
+    SM83_CB_INSTRUCTION_DECLARATION(STRT_INTR_P4),
+    SM83_CB_INSTRUCTION_DECLARATION(STRT_INTR_P5)
 );
 
 // ******************************************************************************************************
@@ -7287,6 +7317,12 @@ const SM83Opcode opcodesTable[] = {
     SM83_INSTRUCTION_INFO(0xFD, "---",           1, 1, 0, SM83_INSTRUCTION_STEPS_DECLARATION(UNDEFINED_0xFD)),
     SM83_INSTRUCTION_INFO(0xFE, "CP A, n8",      2, 2, 0, SM83_INSTRUCTION_STEPS_DECLARATION(CPA8)),
     SM83_INSTRUCTION_INFO(0xFF, "RST $38",       1, 4, 0, SM83_INSTRUCTION_STEPS_DECLARATION(RST38)),
+    
+    // 0x100
+    // Special "instructions". These are instructions baked into the SM83 silicon
+    //     like the logic for handling an interrupt.
+    SM83_INSTRUCTION_INFO(0x100, "STRT INTR",    1, 5, 0, SM83_INSTRUCTION_STEPS_DECLARATION(STRT_INTR)),
+
 };
 
 // **********************************

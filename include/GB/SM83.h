@@ -7,6 +7,7 @@
 
 #include "global.h"
 #include "bus.h"
+#include "GB/memory/interrupt.h"
 
 #define SM83_DEFAULT_N_TCYCLES_FOR_1_MCYCLE 4
 #define SM83_CCB_N_TCYCLES_FOR_1_MCYCLE 2
@@ -81,6 +82,7 @@ public:
     struct RegisterFile registers;
     CpuContext context;
 #pragma pack(pop)
+    InterruptState* intrState;
 
     bool IME;
     Bus* bus;

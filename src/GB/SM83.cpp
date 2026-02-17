@@ -27,7 +27,8 @@ SM83Cpu::SM83Cpu(Bus* bus, bool debugPrint) {
 
     this->context = c;
 
-    this->IME = true;
+    this->intrState = new InterruptState;
+    this->intrState->intrMasterEnable = false;
 
     this->tCycle = 0;
     this->mCycle = 0;
