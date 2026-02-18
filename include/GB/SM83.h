@@ -92,8 +92,7 @@ public:
     u8 tCycleNumForOneMCycle;
 
     bool isHalted;
-    u8 isHaltedSteps;
-    bool doHaltBug;
+    u8 isHaltJustSet;
 
     bool debugPrint;
 

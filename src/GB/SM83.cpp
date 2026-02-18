@@ -34,8 +34,7 @@ SM83Cpu::SM83Cpu(Bus* bus, bool debugPrint) {
     this->tCycleNumForOneMCycle = SM83_DEFAULT_N_TCYCLES_FOR_1_MCYCLE;
     
     this->isHalted = false;
-    this->isHaltedSteps = 0;
-    this->doHaltBug = false;
+    this->isHaltJustSet = false;
 
     this->debugPrint = debugPrint;
 }
@@ -52,6 +51,10 @@ void SM83Cpu::tick() {
     if (this->isHalted) {
         if (!this->onHaltCheckWakeUp())
             return;
+        else {
+            this->isHalted = false;
+            this->isHaltJustSet = false;
+        }
     }
 
     bool CBModeInstructionExecuted = false;
@@ -210,24 +213,29 @@ bool SM83Cpu::onHaltCheckWakeUp() {
         // CPU wakes up if IME is true and ANY interrupt is pending that is enabled
         return this->hrState->intrState.intrEnable & this->hrState->intrState.intrFlags != 0;
     }
-    else {
-        // Check halt bug
-        if (this->isHaltedSteps == 0) {
-            this->isHaltedSteps++;
+    
+    // Check halt bug
+    if (this->isHaltJustSet) {
+        // halt bug can only happen if the conditions are met when halt has just been executed
+        this->isHaltJustSet = false;
 
-            bool hasPendingIntr = this->hrState->intrState.intrFlags != 0;
+        bool hasPendingIntr = this->hrState->intrState.intrFlags != 0;
 
-            // Halt bug should occure as the HALT has just happened and it had pending interrupts
-            if (hasPendingIntr) {
-                this->doHaltBug = true;
+        // Halt bug should occure as the HALT has just happened and it had pending interrupts
+        if (hasPendingIntr) {
+            // the halt bug effect itself
+            this->registers.PC--;
 
-                return true;
-            }
+            return true;
         }
 
-        // Same here, but the interrupt will not be handled as IME is 0.
-        return this->hrState->intrState.intrEnable & this->hrState->intrState.intrFlags != 0;
+        return false;
     }
+        
+    this->isHaltJustSet = false;
+
+     // Same here, but the interrupt will not be handled as IME is 0.
+     return this->hrState->intrState.intrEnable & this->hrState->intrState.intrFlags != 0;
 }
 
 void SM83Cpu::debug_print_state() {
