@@ -6,6 +6,9 @@ Interrupt::Interrupt(InterruptState* state) : Memory(INTR_RANGE_FROM, INTR_RANGE
     this->state = state;
     
     this->state->intrMasterEnable = false;
+
+    this->state->intrInProgressOfEnable = false;
+    this->state->intrInProgressStep = 0;
 }
 
 Interrupt::~Interrupt() {}

@@ -85,12 +85,15 @@ public:
 #pragma pack(pop)
     HardwareRegisterState* hrState;
 
-    bool IME;
     Bus* bus;
 
     long tCycle;
     long mCycle;
     u8 tCycleNumForOneMCycle;
+
+    bool isHalted;
+    u8 isHaltedSteps;
+    bool doHaltBug;
 
     bool debugPrint;
 
@@ -102,6 +105,8 @@ public:
     bool hasInterrupt();
     bool canHandleInterrupt();
     void prepareInterrupt();
+
+    bool onHaltCheckWakeUp();
 
     void debug_print_state();
 };

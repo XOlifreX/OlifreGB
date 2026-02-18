@@ -24,6 +24,9 @@ enum InterruptTypes {
 
 struct InterruptState {
     bool intrMasterEnable;
+    
+    bool intrInProgressOfEnable;
+    u8 intrInProgressStep;
 
     union {
         u8 _unused1 : 3;

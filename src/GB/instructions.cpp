@@ -3031,7 +3031,9 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0x76: HALT
 SM83_INSTRUCTION_IMPLEMENTATION(HALT,
-    cpu
+    cpu->isHalted = true;
+    cpu->isHaltedSteps = 0;
+    cpu->doHaltBug = false;
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
@@ -5744,9 +5746,8 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xD9: RETI (Return from interupt handler)
 SM83_INSTRUCTION_IMPLEMENTATION_NO_PC_INCREASE(RETI,
-    if (!is_test_mode) {
-        cpu->hrState->intrState.intrMasterEnable = true;
-    }
+    cpu->hrState->intrState.intrInProgressOfEnable = true;
+    cpu->hrState->intrState.intrInProgressStep = 0;
     
     cpu->registers.Z = cpu->bus->readMemoryU8(cpu->registers.SP);
     cpu->registers.SP++;
@@ -6740,7 +6741,8 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 
 // 0xFB: EI // Enable Interupts
 SM83_INSTRUCTION_IMPLEMENTATION(EI,
-    cpu->hrState->intrState.intrMasterEnable = true;
+    cpu->hrState->intrState.intrInProgressOfEnable = true;
+    cpu->hrState->intrState.intrInProgressStep = 0;
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(

@@ -32,6 +32,10 @@ SM83Cpu::SM83Cpu(Bus* bus, bool debugPrint) {
     this->tCycle = 0;
     this->mCycle = 0;
     this->tCycleNumForOneMCycle = SM83_DEFAULT_N_TCYCLES_FOR_1_MCYCLE;
+    
+    this->isHalted = false;
+    this->isHaltedSteps = 0;
+    this->doHaltBug = false;
 
     this->debugPrint = debugPrint;
 }
@@ -44,6 +48,12 @@ SM83Cpu::~SM83Cpu() {
 
 // Perform one M-cycle
 void SM83Cpu::tick() {
+    // If CPU is on halt state, check if the CPU should wake up
+    if (this->isHalted) {
+        if (!this->onHaltCheckWakeUp())
+            return;
+    }
+
     bool CBModeInstructionExecuted = false;
 
     // Get CB prefix instruction
@@ -99,6 +109,18 @@ void SM83Cpu::tick() {
                 this->context.CBMode = false;
                 this->context.instruction_exit_early = false;
             }
+
+            // Handle delayed interrupt enable if reenabled
+            if (this->hrState->intrState.intrInProgressOfEnable) {
+                this->hrState->intrState.intrInProgressStep++;
+
+                if (this->hrState->intrState.intrInProgressStep > 1) {
+                    this->hrState->intrState.intrMasterEnable = true;
+                
+                    this->hrState->intrState.intrInProgressOfEnable = false;
+                    this->hrState->intrState.intrInProgressStep = 0;
+                }
+            }
         }
         else {
             this->prepareInterrupt();
@@ -106,6 +128,7 @@ void SM83Cpu::tick() {
         
         if (this->debugPrint)
             std::cout << std::endl << std::endl << "PC:  0x" << std::hex << this->registers.PC << ": " << this->context.currentInstruction->name << std::endl;
+    
     }
 
     if (this->debugPrint)
@@ -176,6 +199,35 @@ void SM83Cpu::prepareInterrupt() {
     this->context.currentStep = 0;
     this->context.CBMode = false;
     this->context.instruction_exit_early = false;
+}
+
+
+bool SM83Cpu::onHaltCheckWakeUp() {
+    if (!this->isHalted)
+        return true;
+
+    if (this->hrState->intrState.intrMasterEnable) {
+        // CPU wakes up if IME is true and ANY interrupt is pending that is enabled
+        return this->hrState->intrState.intrEnable & this->hrState->intrState.intrFlags != 0;
+    }
+    else {
+        // Check halt bug
+        if (this->isHaltedSteps == 0) {
+            this->isHaltedSteps++;
+
+            bool hasPendingIntr = this->hrState->intrState.intrFlags != 0;
+
+            // Halt bug should occure as the HALT has just happened and it had pending interrupts
+            if (hasPendingIntr) {
+                this->doHaltBug = true;
+
+                return true;
+            }
+        }
+
+        // Same here, but the interrupt will not be handled as IME is 0.
+        return this->hrState->intrState.intrEnable & this->hrState->intrState.intrFlags != 0;
+    }
 }
 
 void SM83Cpu::debug_print_state() {
