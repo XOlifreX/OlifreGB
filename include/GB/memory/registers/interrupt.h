@@ -22,6 +22,8 @@ enum InterruptTypes {
     Intr_Joypad = 0x60
 };
 
+class Interrupt;
+
 struct InterruptState {
     bool intrMasterEnable;
     
@@ -51,6 +53,7 @@ struct InterruptState {
     };
 
     InterruptTypes curr_req_intr;
+    Interrupt* memory;
 };
 
 class Interrupt : public Memory {
@@ -67,6 +70,8 @@ public:
     void writeMemoryU8(u32 address, u8 data);
     
     bool isAddressInRange(u32 address);
+
+    void updateIFFlags();
 };
 
 #endif // INTERRUPTS_H

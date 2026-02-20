@@ -191,6 +191,9 @@ void SM83Cpu::prepareInterrupt() {
         exit(1);
     }
 
+    // Update flags to the actual register memory
+    this->hrState->intrState.memory->updateIFFlags();
+
     // PC will be one ahead after handling an interrupt. So we decrease it by an extra one
     this->registers.PC--;
 

@@ -7,13 +7,13 @@
 		- [x] MBC1
 		- [x] MBC2
 		- [ ] MBC3
-			- [X] MBC3 itself
+			- [x] MBC3 itself
 			- [ ] RTC
 		- [ ] MBC5
 		- [ ] MBC6
 		- [ ] MBC7
 		- [ ] Others
-- [ ] Interupts
+- [x] Interupts
 - [ ] Timers
 - [ ] PPU
 - [ ] Inputs

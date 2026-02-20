@@ -4,6 +4,7 @@
 
 Interrupt::Interrupt(InterruptState* state) : Memory(INTR_RANGE_FROM, INTR_RANGE_TO) {
     this->state = state;
+    this->state->memory = this;
     
     this->state->intrMasterEnable = false;
 
@@ -56,4 +57,8 @@ bool Interrupt::isAddressInRange(u32 address) {
         return true;
 
     return address == INTR_IF_ADDRESS;
+}
+
+void Interrupt::updateIFFlags() {
+    this->writeMemoryU8(INTR_IF_ADDRESS, this->state->intrFlags);
 }
