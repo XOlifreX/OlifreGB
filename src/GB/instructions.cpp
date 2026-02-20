@@ -3032,8 +3032,7 @@ SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
 // 0x76: HALT
 SM83_INSTRUCTION_IMPLEMENTATION(HALT,
     cpu->isHalted = true;
-    cpu->isHaltedSteps = 0;
-    cpu->doHaltBug = false;
+    cpu->isHaltJustSet = true;
 )
 
 SM83_INSTRUCTION_STEPS_IMPLEMENTATION(
