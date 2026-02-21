@@ -107,6 +107,8 @@ public:
 
     bool onHaltCheckWakeUp();
 
+    void handleTimers();
+
     void debug_print_state();
 };
 

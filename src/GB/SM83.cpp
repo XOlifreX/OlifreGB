@@ -241,6 +241,10 @@ bool SM83Cpu::onHaltCheckWakeUp() {
      return this->hrState->intrState.intrEnable & this->hrState->intrState.intrFlags != 0;
 }
 
+void SM83Cpu::handleTimers() {
+
+}
+
 void SM83Cpu::debug_print_state() {
     std::cout << "*************************" << std::endl;
     std::cout << "Steps: " << std::dec << this->context.currentStep << std::endl;
