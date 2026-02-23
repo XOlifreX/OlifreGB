@@ -91,6 +91,7 @@ public:
     long mCycle;
     u8 tCycleNumForOneMCycle;
 
+    bool isStopped;
     bool isHalted;
     u8 isHaltJustSet;
 
@@ -105,11 +106,13 @@ public:
     bool canHandleInterrupt();
     void prepareInterrupt();
 
+    bool onStopCheckWakeUp();
     bool onHaltCheckWakeUp();
 
     void handleTimers();
 
     void debug_print_state();
+    void debug_print_state_more();
 };
 
 #endif // SM83_H

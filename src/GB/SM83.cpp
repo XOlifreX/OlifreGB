@@ -47,14 +47,21 @@ SM83Cpu::~SM83Cpu() {
 
 // Perform one M-cycle
 void SM83Cpu::tick() {
+    // If CPU is stopped, check if CPU should wake up
+    if (this->isStopped) {
+        if (!this->onStopCheckWakeUp())
+            return;
+
+        this->isStopped = false;
+    }
+
     // If CPU is on halt state, check if the CPU should wake up
     if (this->isHalted) {
         if (!this->onHaltCheckWakeUp())
             return;
-        else {
-            this->isHalted = false;
-            this->isHaltJustSet = false;
-        }
+
+        this->isHalted = false;
+        this->isHaltJustSet = false;
     }
 
     bool CBModeInstructionExecuted = false;
@@ -136,6 +143,8 @@ void SM83Cpu::tick() {
 
     if (this->debugPrint)
         this->debug_print_state();
+
+    this->handleTimers();
 }
 
 bool SM83Cpu::hasInterrupt() {
@@ -208,6 +217,22 @@ void SM83Cpu::prepareInterrupt() {
 }
 
 
+bool SM83Cpu::onStopCheckWakeUp() {
+    if (is_test_mode)
+        return true;
+
+    if (!this->isStopped)
+        return true;
+
+    // Should quit stop mode if any input on the joypad is done (any joypad interrupt)
+    if (this->hrState->intrState.intrFlagJoypad) {
+        this->hrState->intrState.intrFlagJoypad = 0;
+        return true;
+    }
+
+    return false;
+}
+
 bool SM83Cpu::onHaltCheckWakeUp() {
     if (!this->isHalted)
         return true;
@@ -242,8 +267,19 @@ bool SM83Cpu::onHaltCheckWakeUp() {
 }
 
 void SM83Cpu::handleTimers() {
+    if (is_test_mode)
+        return;
 
+    this->hrState->timerState.divCycleCounter++;
+    this->hrState->timerState.timaCycleCounter++;
+
+    this->hrState->timerState.memory->handleDiv();
+    this->hrState->timerState.memory->handleTima();
 }
+
+// **************************************************
+// **************************************************
+// **************************************************
 
 void SM83Cpu::debug_print_state() {
     std::cout << "*************************" << std::endl;
@@ -256,5 +292,23 @@ void SM83Cpu::debug_print_state() {
     std::cout << "BC:    0x" << std::hex << this->registers.BC << std::endl;
     std::cout << "DE:    0x" << std::hex << this->registers.DE << std::endl;
     std::cout << "HL:    0x" << std::hex << this->registers.HL << std::endl;
+    std::cout << "**************************************************" << std::endl;
+}
+
+void SM83Cpu::debug_print_state_more() {
+    std::cout << "*************************" << std::endl;
+    std::cout << "Steps: " << std::dec << this->context.currentStep << std::endl;
+    std::cout << "TP: " << std::dec << this->context.TP << std::endl;
+    std::cout << "*************************" << std::endl;
+    std::cout << "PC: " << std::dec << this->registers.PC << std::endl;
+    std::cout << "SP: " << std::dec << this->registers.SP << std::endl;
+    std::cout << "A:  " << std::dec << (u16)this->registers.A << std::endl;
+    std::cout << "F:  " << std::dec << (u16)this->registers.F.flag << std::endl;
+    std::cout << "B:  " << std::dec << (u16)this->registers.B << std::endl;
+    std::cout << "C:  " << std::dec << (u16)this->registers.C << std::endl;
+    std::cout << "D:  " << std::dec << (u16)this->registers.D << std::endl;
+    std::cout << "E:  " << std::dec << (u16)this->registers.E << std::endl;
+    std::cout << "H:  " << std::dec << (u16)this->registers.H << std::endl;
+    std::cout << "L:  " << std::dec << (u16)this->registers.L << std::endl;
     std::cout << "**************************************************" << std::endl;
 }

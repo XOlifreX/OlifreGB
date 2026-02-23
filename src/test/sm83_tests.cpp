@@ -63,18 +63,24 @@ bool run_sm83_test(SM83TestCase test) {
 
     passed &= cpu->registers.PC == test.final.pc;
     passed &= cpu->registers.SP == test.final.sp;
-
-    // Check RAM
-    for (std::vector<SM83RamEntry>::const_iterator it = test.final.ram.begin(); it != test.final.ram.end(); ++it) {
-        const SM83RamEntry ram = *it;
     
-        u8 val = bus->readMemoryU8(ram.address, false);
-
-        passed &= val == ram.value;
+    if (!passed) {
+        std::cout << "Test " << test.name << ": FAILED: At flags" << std::endl;
+        cpu->debug_print_state_more();
     }
-
-    if (!passed)
-        std::cout << "Test " << test.name << ": FAILED" << std::endl;
+    else {
+        // Check RAM
+        for (std::vector<SM83RamEntry>::const_iterator it = test.final.ram.begin(); it != test.final.ram.end(); ++it) {
+            const SM83RamEntry ram = *it;
+        
+            u8 val = bus->readMemoryU8(ram.address, false);
+    
+            passed &= val == ram.value;
+        }
+    
+        if (!passed)
+            std::cout << "Test " << test.name << ": FAILED: At RAM" << std::endl;
+    }
 
     // deletes bus too
     delete cpu;

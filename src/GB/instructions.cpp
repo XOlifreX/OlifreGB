@@ -440,7 +440,8 @@ SM83_CB_INSTRUCTION_STEPS_IMPLEMENTATION(
 SM83_INSTRUCTION_IMPLEMENTATION(STOP8,
     // Enter CPU very low power mode. Also used to switch between double and normal speed CPU modes in GBC.
     // So, tick speed should change to something else
-    // TODO: implement the ticket speed change
+    // TODO: implement the tick speed change
+    cpu->isStopped = true;
 )
 
 SM83_INSTRUCTION_IMPLEMENTATION(STOP8_P2,)

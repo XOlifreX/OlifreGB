@@ -14,7 +14,7 @@
 		- [ ] MBC7
 		- [ ] Others
 - [x] Interupts
-- [ ] Timers
+- [X] Timers
 - [ ] PPU
 - [ ] Inputs
 - [ ] Audio
