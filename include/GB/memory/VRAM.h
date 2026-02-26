@@ -11,7 +11,23 @@
 
 #define VRAM_FULL_SIZE (RAM_RANGE_TO - RAM_RANGE_FROM + 1)
 
+enum VRAMAddressMode {
+    VRAM_8000_Mode,
+    VRAM_8800_Mode
+};
+
+class VRAM;
+
+struct VRAMState {
+    VRAMAddressMode mode;
+
+    VRAM* memory;
+};
+
 class VRAM: public Memory {
+private:
+    VRAMState* state;
+
 public:
     VRAM();
     ~VRAM();

@@ -21,6 +21,7 @@ include_directories(include ${OPENGL_INCLUDE_DIRS} ${GLFW3_INCLUDE_DIRS} ${GLM_I
 file(GLOB SOURCES
     src/*.cpp
     src/GB/*.cpp
+    src/GB/render/*.cpp
     src/GB/memory/*.cpp
     src/GB/memory/MBC/*.cpp 
     src/GB/memory/registers/*.cpp 
