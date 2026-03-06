@@ -5,6 +5,7 @@
 #include "GB/memory/memory.h"
 #include "GB/memory/registers/interrupt.h"
 #include "GB/memory/registers/timer.h"
+#include "GB/memory/registers/lcd.h"
 
 #define HR_RANGE_FROM 0xFF00
 #define HR_RANGE_TO 0xFF7F
@@ -12,6 +13,7 @@
 struct HardwareRegisterState {
     InterruptState intrState;
     TimerState timerState;
+    LcdState LcdState;
 };
 
 // Only used in test-mode
@@ -21,6 +23,7 @@ private:
 
     Interrupt* intr;
     Timer* timer;
+    LCD* lcd;
 
 public:
     HardwareRegistors();

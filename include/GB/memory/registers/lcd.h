@@ -30,15 +30,6 @@
     (ADDRESS >= LCD_PALLET_BCPS && ADDRESS <= LCD_PALLET_OCPD)
 
 
-enum InterruptTypes {
-    Intr_None = 0x00,
-    Intr_VBlank = 0x40,
-    Intr_STAT = 0x48,
-    Intr_Timer = 0x50,
-    Intr_Serial = 0x58,
-    Intr_Joypad = 0x60
-};
-
 class LCD;
 
 struct LcdState {

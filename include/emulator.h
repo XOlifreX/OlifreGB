@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "GB/memory/cartridge.h"
+#include "GB/render/ppu.h"
 #include "GB/SM83.h"
 #include "GB/bus.h"
 
@@ -15,7 +16,9 @@ class Emulator {
 protected:
     Bus* bus;
     SM83Cpu* cpu;
+    PPU* ppu;
     Cartridge* cartridge;
+
     
 private:
     bool paused;

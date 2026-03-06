@@ -5,11 +5,13 @@
 HardwareRegistors::HardwareRegistors() : Memory(HR_RANGE_FROM, HR_RANGE_TO) {
     this->intr = new Interrupt(&this->state.intrState);
     this->timer = new Timer(&this->state.timerState, &this->state.intrState);
+    this->lcd = new LCD(&this->state.LcdState);
 }
 
 HardwareRegistors::~HardwareRegistors() {
     delete this->intr;
     delete this->timer;
+    delete this->lcd;
 }
 
 // *****
@@ -32,6 +34,10 @@ u8 HardwareRegistors::readMemoryU8(u32 address) {
     // Timer stuff
     if (this->timer->isAddressInRange(address))
         return this->timer->readMemoryU8(address);
+    // LCD stuff
+    if (this->lcd->isAddressInRange(address))
+        return this->lcd->readMemoryU8(address);
+    
 
     return this->data[address - HR_RANGE_FROM];
 }
@@ -52,6 +58,11 @@ void HardwareRegistors::writeMemoryU8(u32 address, u8 value) {
     // Timer stuff
     if (this->timer->isAddressInRange(address)) {
         this->timer->writeMemoryU8(address, value);
+        return;
+    }
+    // LCD stuff
+    if (this->lcd->isAddressInRange(address)) {
+        this->lcd->writeMemoryU8(address, value);
         return;
     }
 

@@ -45,10 +45,6 @@ void LCD::writeMemoryU8(u32 address, u8 value) {
     }
 
     switch (address) {
-        case LCD_RANGE_FROM:
-            break;
-        case LCD_RANGE_TO:
-            break;
         case LCD_CONTROL_LCDC:
             break;
         case LCD_STATUS_STAT:
