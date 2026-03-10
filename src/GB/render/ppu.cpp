@@ -9,13 +9,59 @@ PPU::PPU(Bus* bus) {
     this->lcdState = &temp->LcdState;
 
     this->state.mode = PPU_Mode2;
+    
+    this->state.modeState.mode2.step = 0;
+    this->state.modeState.mode2.currSpriteIndex = 0;
 }
 PPU::~PPU() {}
 
 // *****
 
+// Mode 2: OAM Scan
+// Goes over all 40 sprites in the OAM RAM and checks which ones need to be rendered on the current scanline
+// Lasts 80 dots, so 1 sprite per 2 dots. Thus, this process is divided in 2 steps.
 void PPU::execMode2() {
+    // Start Mode 2 (OAM Scan) in a clean state
+    if (this->lcdState->ly == 0x00) {
+        this->spriteBuffer.clear();
+        this->state.modeState.mode2.step = 0;
+        this->state.modeState.mode2.currSpriteIndex = 0;
+    }
 
+    if (this->spriteBuffer.size() >= 10)
+        return;
+    
+    // Step 1: Get Nth sprite data
+    if (!this->state.modeState.mode2.step) {
+        this->state.modeState.mode2.step++;
+        
+        ObjectInfo sprite;
+        sprite.yPos  = this->bus->readMemoryU8(OAM_RANGE_FROM + (4 * this->state.modeState.mode2.currSpriteIndex));
+        sprite.xPos  = this->bus->readMemoryU8(OAM_RANGE_FROM + (4 * this->state.modeState.mode2.currSpriteIndex) + 1);
+        sprite.index = this->bus->readMemoryU8(OAM_RANGE_FROM + (4 * this->state.modeState.mode2.currSpriteIndex) + 2);
+        sprite.flags = this->bus->readMemoryU8(OAM_RANGE_FROM + (4 * this->state.modeState.mode2.currSpriteIndex) + 3);
+ 
+        this->state.modeState.mode2.currSprite = sprite;
+    }
+    else {
+        // Step 2: Check if sprite needs to be used during rendering for this scanline
+
+        // Is sprite 8x16 of 8x8
+        bool isTallSprite = this->lcdState->ObjSize;
+
+        u8 yPosMin = this->state.modeState.mode2.currSprite.yPos;
+        u8 yPosMax = this->state.modeState.mode2.currSprite.yPos + (8 * (isTallSprite + 1));
+        u8 internalYPos = this->lcdState->ly + 16;
+
+        // Is the sprite in current Y pos range
+        if (internalYPos >= yPosMin && internalYPos < yPosMax) {
+            // Push to sprite buffer if OK
+            this->spriteBuffer.push_back(this->state.modeState.mode2.currSprite);
+        }
+
+        this->state.modeState.mode2.step = 0;
+        this->state.modeState.mode2.currSpriteIndex++;
+    }
 }
 
 void PPU::execMode3() {

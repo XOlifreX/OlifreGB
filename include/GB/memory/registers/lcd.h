@@ -29,7 +29,6 @@
     (ADDRESS >= LCD_CONTROL_LCDC && ADDRESS <= LCD_SCROLLING_WX) || \
     (ADDRESS >= LCD_PALLET_BCPS && ADDRESS <= LCD_PALLET_OCPD)
 
-
 class LCD;
 
 struct LcdState {

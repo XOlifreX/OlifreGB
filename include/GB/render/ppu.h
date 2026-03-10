@@ -6,6 +6,7 @@
 
 #include "GB/memory/registers/hardware_registers.h"
 #include "GB/memory/registers/lcd.h"
+#include "GB/memory/OAM.h"
 #include "GB/bus.h"
 
 #define MODE2_MAX_DOT_COUNT     80
@@ -18,6 +19,12 @@
 #define LY_MODE_1               144
 #define LY_LAST_INDEX           153
 
+#define SCREEN_WIDTH            160
+#define SCREEN_HEIGHT           144
+
+#define WINDOW_TILEMAP_0        0x9800
+#define WINDOW_TILEMAP_1        0x9C00
+
 enum PPUModes {
     PPU_Mode2,
     PPU_Mode3,
@@ -25,8 +32,24 @@ enum PPUModes {
     PPU_Mode1
 };
 
+struct ObjectInfo {
+    u8 yPos;
+    u8 xPos;
+    u8 index;
+    u8 flags;
+};
+
+struct ModeState {
+    struct {
+        u8 step;
+        u8 currSpriteIndex;
+        ObjectInfo currSprite;
+    } mode2;
+};
+
 struct PPUState {
     PPUModes mode;
+    ModeState modeState;
     
     u16 currModeEstimatedTotalDotCount;
     u16 currModeDotCount;
@@ -42,6 +65,8 @@ private:
     LcdState* lcdState;
 
     Bus* bus;
+
+    std::vector<ObjectInfo> spriteBuffer;
 
     void execMode2();
     void execMode3();
